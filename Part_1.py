@@ -43,7 +43,9 @@ with open("dialogues.txt", "w") as dial:
                 print(f"{u_task}", file=dial)
 
 
-                for i in range(0,max(len(s_turns),len(u_turns))):
+                for i in range(0,len(s_turns)):
+# The above range only makes sense if the number of system turns always equals
+# the number of user turns. I think it is the case, but I did not check.
                     s_turn = s_dict['turns'][i]
                     s_index = s_turn['turn-index']
                     s_output = s_turn['output']
