@@ -21,7 +21,7 @@ import os
 
 train_test = ["dstc2_train", "dstc2_test"]
 
-with open("dialogues.txt", "w") as train:
+with open("dialogues.txt", "w") as dial:
     for f_name in train_test:
         train_path = f_name + "/data"
         train_dirs = os.listdir(train_path)
@@ -39,8 +39,8 @@ with open("dialogues.txt", "w") as train:
                 u_taskinfo = u_dict['task-information']
                 u_goal = u_taskinfo['goal']
                 u_task = u_goal['text']
-                print(f"session id: {data_dir}", file=train)
-                print(f"{u_task}", file=train)
+                print(f"session id: {data_dir}", file=dial)
+                print(f"{u_task}", file=dial)
 
 
                 for i in range(0,max(len(s_turns),len(u_turns))):
@@ -48,9 +48,9 @@ with open("dialogues.txt", "w") as train:
                     s_index = s_turn['turn-index']
                     s_output = s_turn['output']
                     s_utt = s_output['transcript']
-                    print(f"system: {s_utt}", file=train)
+                    print(f"system: {s_utt}", file=dial)
 
                     u_turn = u_dict['turns'][i]
                     u_index = u_turn['turn-index']
                     u_utt = u_turn['transcription']
-                    print(f"user: {u_utt}", file=train)
+                    print(f"user: {u_utt}", file=dial)
