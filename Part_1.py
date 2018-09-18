@@ -19,20 +19,29 @@
 import json
 import os
 
-train_test = ["dstc2_train", "dstc2_test"]
+train_test = ["dstc2_train", "dstc2_test"] # names of the folders with the train
+# and test data
 
 with open("dialogues.txt", "w") as dial:
-    for f_name in train_test:
-        train_path = f_name + "/data"
-        train_dirs = os.listdir(train_path)
-        for train_dir in train_dirs:
-            data_path = train_path + "/" + train_dir
-            data_dirs = os.listdir(data_path)
+    for f_name in train_test: # For the folder with train and the folder with
+    # test-data:
+        f_path = f_name + "/data" # Save the path to the data folder
+        f_dirs = os.listdir(f_path) # Save the names of all folders in the
+        # training and test folders (the "Mar13...") folders.
+        for f_dir in f_dirs:
+            data_path = f_path + "/" + f_dir # Save the path to each of the
+            # "Mar13..." folders.
+            data_dirs = os.listdir(data_path) # Save the names of each of the dialogue
+            # folders in the "Mar13..." folders.
             for data_dir in data_dirs:
                 s_file = open(data_path + "/" + data_dir + "/log.json").read()
-                s_dict = json.loads(s_file)
+                # path to system dialogue info
+                s_dict = json.loads(s_file) # save the jason file in a Python
+                # dictionary
                 s_turns = s_dict['turns']
 
+                # Do the same for the user, additionally, save the task and
+                # the session id (folder name)
                 u_file = open(data_path + "/" + data_dir + "/label.json").read()
                 u_dict = json.loads(u_file)
                 u_turns = u_dict['turns']
@@ -46,6 +55,7 @@ with open("dialogues.txt", "w") as dial:
                 for i in range(0,len(s_turns)):
 # The above range only makes sense if the number of system turns always equals
 # the number of user turns. I think it is the case, but I did not check.
+                    # Print user and system utterances to dialogues file.
                     s_turn = s_dict['turns'][i]
                     s_index = s_turn['turn-index']
                     s_output = s_turn['output']
