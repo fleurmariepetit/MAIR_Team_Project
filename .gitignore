@@ -186,6 +186,7 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+
 ### Python Patch ###
 .venv/
 
@@ -201,5 +202,7 @@ dmypy.json
 pyvenv.cfg
 pip-selfcheck.json
 
-
 # End of https://www.gitignore.io/api/python,pycharm+iml
+
+/dstc2_test
+/dstc2_traindev
