@@ -1,4 +1,4 @@
-# Vocabulary size = 728
+# Vocabulary size = 784
 # Sequence length = 23
 # Length trainingset = 25501
 
@@ -26,6 +26,8 @@ for i in range(len(split_lines)):
         #line[j] = int_arr
         line[j] = ch_int
 
+# Print vocabulary size.
+print(np.amax(split_lines))
 
 data = np.array(split_lines, dtype=float)
 print(data.shape)
@@ -45,7 +47,7 @@ x_train, x_test, y_train, y_test = train_test_split(data, target, test_size= .15
 
 # Define model
 model = Sequential()
-model.add(Embedding(1000, 1, input_length = 23))
+model.add(Embedding(785, 1, input_length = 23))
 model.add(LSTM((1), batch_input_shape = (None,23,1),return_sequences=True))
 model.add(LSTM((1), return_sequences = False))
 model.compile(loss='mean_absolute_error', optimizer = 'adam', metrics = ['accuracy'])
