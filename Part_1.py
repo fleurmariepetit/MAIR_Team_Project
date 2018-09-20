@@ -19,7 +19,7 @@
 import json
 import os
 
-path_to_project = "C:/Users/tycho/OneDrive/Documenten/GitHub/MAIR_Team_Project/" # please fill in path to project folder
+path_to_project =  # please fill in path to project folder
 train_test = ["dstc2_train", "dstc2_test"] # names of the folders with the train
 # and test data
 
