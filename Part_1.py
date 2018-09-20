@@ -19,13 +19,14 @@
 import json
 import os
 
+path_to_project = "C:/Users/tycho/OneDrive/Documenten/GitHub/MAIR_Team_Project/" # please fill in path to project folder
 train_test = ["dstc2_train", "dstc2_test"] # names of the folders with the train
 # and test data
 
 with open("dialogues.txt", "w") as dial:
     for f_name in train_test: # For the folder with train and the folder with
     # test-data:
-        f_path = f_name + "/data" # Save the path to the data folder
+        f_path = path_to_project + f_name + "/data" # Save the path to the data folder
         f_dirs = os.listdir(f_path) # Save the names of all folders in the
         # training and test folders (the "Mar13...") folders.
         for f_dir in f_dirs:
@@ -50,7 +51,9 @@ with open("dialogues.txt", "w") as dial:
                 u_task = u_goal['text']
                 print(f"session id: {data_dir}", file=dial)
                 print(f"{u_task}", file=dial)
-
+                print()
+                print("session id: " + data_dir)
+                print(u_task )
 
                 for i in range(0,len(s_turns)):
 # The above range only makes sense if the number of system turns always equals
@@ -61,8 +64,12 @@ with open("dialogues.txt", "w") as dial:
                     s_output = s_turn['output']
                     s_utt = s_output['transcript']
                     print(f"system: {s_utt}", file=dial)
+                    print("system:" + s_utt)
 
                     u_turn = u_dict['turns'][i]
                     u_index = u_turn['turn-index']
                     u_utt = u_turn['transcription']
                     print(f"user: {u_utt}", file=dial)
+                    print("user: " + u_utt)
+
+                input("Please press enter for the next dialogue...")
