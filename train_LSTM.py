@@ -50,7 +50,7 @@ model = Sequential()
 model.add(Embedding(785, 1, input_length = 23, mask_zero = True))
 model.add(LSTM((1), batch_input_shape = (None,23,1),return_sequences=True, activation='softmax', recurrent_activation = 'relu'))
 #model.add(LSTM((1), return_sequences = False))
-model.compile(loss='categorical_crossentropy', optimizer = 'adam', metrics = ['categorical_accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
 print(model.summary())
 
 # Train it. 2 epochs just for testing. Training more epochs takes longer but
