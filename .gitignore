@@ -5,6 +5,9 @@
 /dstc2_test
 /dstc2_train
 
+/part_2_text_classification/testSet.txt
+/part_2_text_classification/trainingSet.txt
+
 ### PyCharm+iml ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
