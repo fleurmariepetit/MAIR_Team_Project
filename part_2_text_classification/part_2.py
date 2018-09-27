@@ -43,7 +43,7 @@ def createTrainAndTestSets(completeDatasetFilename, trainingSetSize, trainingSet
 # Create the word and category dictionaries
 def createWordAndCatogoryDictionaries(fileName):
     wordcount = 2
-    catCount = 0
+    catCount = 1
     lineCount = 0
     wordDict = dict()  # Word dictionary
     catDict = dict()  # Category dictionary
@@ -121,6 +121,7 @@ transformedLabelsSetFileName = 'transformedLabelsSet.txt'
 createTrainAndTestSets(completeDatasetFileName, trainingSetSizePercentile, trainingSetFileName, testSetFileName)
 
 wordDict, catDict = createWordAndCatogoryDictionaries('trainingSet.txt')
+print(catDict)
 
 transformResult = transformSentences(wordDict, catDict, 'trainingSet.txt')
 transformTestset = transformSentences(wordDict, catDict, 'testSet.txt')
