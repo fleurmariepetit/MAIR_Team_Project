@@ -47,10 +47,10 @@ x_train, x_test, y_train, y_test = train_test_split(data, target, test_size= .15
 
 # Define model
 model = Sequential()
-model.add(Embedding(785, 1, input_length = 23))
-model.add(LSTM((1), batch_input_shape = (None,23,1),return_sequences=True))
-model.add(LSTM((1), return_sequences = False))
-model.compile(loss='mean_absolute_error', optimizer = 'adam', metrics = ['accuracy'])
+model.add(Embedding(785, 1, input_length = 23, mask_zero = True))
+model.add(LSTM((1), batch_input_shape = (None,23,1),return_sequences=True, activation='softmax', recurrent_activation = 'relu'))
+#model.add(LSTM((1), return_sequences = False))
+model.compile(loss='categorical_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
 print(model.summary())
 
 # Train it. 2 epochs just for testing. Training more epochs takes longer but
