@@ -109,6 +109,16 @@ def transformUserSentence(wordDict, sentence):
     return transformedSentence
 
 
+def transformLabels(labels):
+    newTrainLabels = []
+    for row in labels:
+        newRow = np.zeros(15, dtype=int)
+        if row is not 0:
+            newRow[row - 1] = 1
+        newTrainLabels.append(newRow)
+    return np.array(newTrainLabels)
+
+
 completeDatasetFileName = 'acts_and_utts.txt'
 
 trainingSetFileName = 'trainingSet.txt'
@@ -121,33 +131,15 @@ transformedLabelsSetFileName = 'transformedLabelsSet.txt'
 createTrainAndTestSets(completeDatasetFileName, trainingSetSizePercentile, trainingSetFileName, testSetFileName)
 
 wordDict, catDict = createWordAndCatogoryDictionaries('trainingSet.txt')
-print(catDict)
 
 transformResult = transformSentences(wordDict, catDict, 'trainingSet.txt')
 transformTestset = transformSentences(wordDict, catDict, 'testSet.txt')
 
 trainData = np.array(transformResult[0])
-trainLabels = transformResult[1]
-newTrainLabels = []
-
-for row in trainLabels:
-    newRow = np.zeros(15, dtype=int)
-    if row is not 0:
-        newRow[row - 1] = 1
-    newTrainLabels.append(newRow)
+trainLabels = transformLabels(transformResult[1])
 
 testData = np.array(transformTestset[0])
-testLabels = transformTestset[1]
-
-newTestLabels = []
-for row in testLabels:
-    newRow = np.zeros(15, dtype=int)
-    if row is not 0:
-        newRow[row - 1] = 1
-    newTestLabels.append(newRow)
-
-newTrainLabels = np.array(newTrainLabels)
-newTestLabels = np.array(newTestLabels)
+testLabels = transformLabels(transformTestset[1])
 
 model = Sequential()
 model.add(Embedding(len(wordDict) + 2, 64, input_length=23, mask_zero=True))
@@ -157,7 +149,7 @@ print(model.summary())
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(trainData, newTrainLabels, epochs=5, validation_data=(testData, newTestLabels))
+history = model.fit(trainData, trainLabels, epochs=5, validation_data=(testData, testLabels))
 
 # Create a reverse lookup table from the dictionary to search by values instead of keys
 catDictReverseLookup = {v: k for k, v in catDict.items()}
