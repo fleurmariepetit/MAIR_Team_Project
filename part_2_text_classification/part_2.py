@@ -142,14 +142,14 @@ testData = np.array(transformTestset[0])
 testLabels = transformLabels(transformTestset[1])
 
 model = Sequential()
-model.add(Embedding(len(wordDict) + 2, 64, input_length=23, mask_zero=True))
-model.add(LSTM(32, activation='relu', input_shape=(64,)))
-model.add(Dense(len(catDict), activation='softmax', input_shape=(32,)))
+model.add(Embedding(len(wordDict) + 2, 128, input_length=23, mask_zero=True))
+model.add(LSTM(128, activation='relu', input_shape=(32,)))
+model.add(Dense(len(catDict), activation='softmax', input_shape=(64,)))
 print(model.summary())
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(trainData, trainLabels, epochs=5, validation_data=(testData, testLabels))
+history = model.fit(trainData, trainLabels, epochs=7, validation_data=(testData, testLabels))
 
 # Create a reverse lookup table from the dictionary to search by values instead of keys
 catDictReverseLookup = {v: k for k, v in catDict.items()}
