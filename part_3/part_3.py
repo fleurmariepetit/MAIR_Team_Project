@@ -1,5 +1,6 @@
 ## part_3
 
+# ---------------------------------
 # Example sentences
 
 # 1. im looking for world food
@@ -29,3 +30,26 @@
 # NP/S -> serves
 # N/N -> world
 # N -> food
+
+# -----------------------------------
+
+# Plan in pseudocode:
+#
+# words_and_types = word-type.csv
+# wat_df = to_dataframe(words_and_types)
+# s2 = empty_string
+#
+# For every letter (l) in input sentence (s):
+#   to_lower_case(l)
+#   if is_letter(l) or is_space(l)
+#       s2 = concatenate(s2, l)
+#
+# words = string_to_list(seperate_str_on = " " )
+# sentence_df = dataframe(words = words, types = NA)
+#
+# For every word in words:
+#   get value of wat_df[,Type1] at word == wat_df[,Word]
+
+
+
+
