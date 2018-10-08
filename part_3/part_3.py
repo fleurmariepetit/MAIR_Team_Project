@@ -72,6 +72,8 @@ for i in np.arange(len(inputText)):
     sentence_df['type2'].iloc[i] = types['Type2'].iloc[0]
     sentence_df['type3'].iloc[i] = types['Type3'].iloc[0]
 
+    # todo: Check all the rows in which the 'type1' column is empty and use the python-Levenshtein library to map values to the closest domain term
+
 print(sentence_df)
 
 
