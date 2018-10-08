@@ -10,4 +10,5 @@
 # NP\NP -> (NP\NP)/N N
 # N -> N/N N
 # N\(S\S) -> (N\(S\S)/N N
-# PP -> PP N
+# PP -> PP/N N
+# PP -> PP/NP NP
