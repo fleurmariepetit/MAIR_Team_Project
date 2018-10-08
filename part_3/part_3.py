@@ -37,18 +37,65 @@
 #
 # words_and_types = word-type.csv
 # wat_df = to_dataframe(words_and_types)
-# s2 = empty_string
+# s = input
+# s1 = ""
 #
-# For every letter (l) in input sentence (s):
+# For every l in input s:
 #   to_lower_case(l)
 #   if is_letter(l) or is_space(l)
-#       s2 = concatenate(s2, l)
+#       s1 = concatenate(s1, l)
 #
-# words = string_to_list(seperate_str_on = " " )
-# sentence_df = dataframe(words = words, types = NA)
+# words = string_to_list(s1, seperate_str_on = " " )
+# sentence_df = dataframe()
 #
 # For every word in words:
-#   get value of wat_df[,Type1] at word == wat_df[,Word]
+#   type = value of wat_df[,Type1] at word == wat_df[,Word]
+#   sentence_df = dataframe(words = word, types = type)
+#
+#-----------------------------------------------------------
+#
+### Example sentence_df:
+## words   | types
+##---------------
+## im      | s
+## looking | (s\s)/pp
+## for     | pp/n
+## world   | n/n
+## food    | n
+#
+#-----------------------------------------------------------
+#
+## Combine types. This results in an extended senetence_df
+# dataframe with atomic and combined types of the words in
+# the input sentence.
+#
+# eventual_len = 2*len(sentences_df) - 1
+#
+# for i in range(1, eventual_len, 2):
+#   last_word = sentences_df[len(sentences_df), words].
+#   previous_word = sentences_df[len(sentences_df) - i, words]
+#   combi = concatenate(previous_word, last_word)
+#   last_type = sentences_df[len(sentences_df), types]
+#   previous_type = sentences_df[len(sentences_df) - i, types]
+#   if str_match(previous_type, reg_ex = concatenate("/", last_type, "$"))
+#       type_combi = str_remove(previous_type, regex = concatenate("/", last_type, ")?$"))
+#   else
+#       type_combi = str_remove(last_type, regex = concatenate("^(?", previous_type, "\"))
+#   type_combi = str_remove(type_combi, regex = ")|(")
+#   sentences_df[len(sentences_df) + 1,] = [combi, type_combi]
+#
+#------------------------------------------------------------
+#
+### Example type-combination
+#
+# last_word = "looking for world food"
+# previous_word = "im"
+# combi = "im looking for world food"
+# last_type = "s\s"
+# previous_type = "s"
+# type_combi = "s"
+# sentences_df[9,] = ["im looking for world food", "s"]
+#
 
 
 
