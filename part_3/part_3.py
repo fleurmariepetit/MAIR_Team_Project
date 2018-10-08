@@ -32,7 +32,6 @@
 # N -> food
 
 # -----------------------------------
-
 # Plan in pseudocode:
 #
 # words_and_types = word-type.csv
@@ -52,8 +51,30 @@
 #   type = value of wat_df[,Type1] at word == wat_df[,Word]
 #   sentence_df = dataframe(words = word, types = type)
 #
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 #
+
+import pandas as pd
+import numpy as np
+
+words_and_types = pd.read_csv('wordtype_classification.csv')
+
+inputText = 'im looking for world food'.lower().split()
+
+sentence_df = pd.DataFrame({'word': inputText, 'type1': np.nan, 'type2': np.nan, 'type3': np.nan},
+                           columns=['word', 'type1', 'type2', 'type3'])
+
+for i in np.arange(len(inputText)):
+    word = sentence_df['word'].iloc[i]
+    types = words_and_types.loc[words_and_types['Word'] == word]
+
+    sentence_df['type1'].iloc[i] = types['Type1'].iloc[0]
+    sentence_df['type2'].iloc[i] = types['Type2'].iloc[0]
+    sentence_df['type3'].iloc[i] = types['Type3'].iloc[0]
+
+print(sentence_df)
+
+
 ### Example sentence_df:
 ## words   | types
 ##---------------
@@ -63,7 +84,7 @@
 ## world   | n/n
 ## food    | n
 #
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 #
 ## Combine types. This results in an extended senetence_df
 # dataframe with atomic and combined types of the words in
@@ -84,7 +105,7 @@
 #   type_combi = str_remove(type_combi, regex = ")|(")
 #   sentences_df[len(sentences_df) + 1,] = [combi, type_combi]
 #
-#------------------------------------------------------------
+# ------------------------------------------------------------
 #
 ### Example type-combination
 #
@@ -96,7 +117,3 @@
 # type_combi = "s"
 # sentences_df[9,] = ["im looking for world food", "s"]
 #
-
-
-
-
