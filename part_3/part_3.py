@@ -34,27 +34,33 @@
 # -----------------------------------
 
 # Plan in pseudocode:
-#
-# words_and_types = word-type.csv
-# wat_df = to_dataframe(words_and_types)
-# s = input
-# s1 = ""
-#
-# For every l in input s:
-#   to_lower_case(l)
-#   if is_letter(l) or is_space(l)
-#       s1 = concatenate(s1, l)
-#
-# words = string_to_list(s1, seperate_str_on = " " )
-# sentence_df = dataframe()
-#
-# For every word in words:
-#   type = value of wat_df[,Type1] at word == wat_df[,Word]
-#   sentence_df = dataframe(words = word, types = type)
-#
+
+import pandas as pd
+import sys
+import re
+import string
+
+# Dataframe with words and types
+wat_df = pd.read_csv("C:/Users/Fleur/PycharmProjects/MAIR_Team_Project/part_3/word-type.csv")
+
+# user input
+s = input("prompt")
+
+s = s.lower()
+s = re.sub(r'[^\w\s]','',s)
+
+words = s.split()
+sentence_df = pd.DataFrame(columns=['words', 'types'])
+
+for word in words:
+    type = wat_df.loc[wat_df["Word"] == word, "Type1"].iloc[0]
+    sentence_row = pd.DataFrame([[word, type]], columns = ["words", "types"])
+    sentence_df = sentence_df.append(sentence_row)
+
 #-----------------------------------------------------------
-#
+
 ### Example sentence_df:
+
 ## words   | types
 ##---------------
 ## im      | s
@@ -62,15 +68,15 @@
 ## for     | pp/n
 ## world   | n/n
 ## food    | n
-#
+
 #-----------------------------------------------------------
-#
-## Combine types. This results in an extended senetence_df
-# dataframe with atomic and combined types of the words in
+
+## Combine types. This results in an extended sentence_df
+# dataframe with atomic ánd combined types of the words in
 # the input sentence.
-#
+
 # eventual_len = 2*len(sentences_df) - 1
-#
+
 # for i in range(1, eventual_len, 2):
 #   last_word = sentences_df[len(sentences_df), words].
 #   previous_word = sentences_df[len(sentences_df) - i, words]
@@ -83,11 +89,11 @@
 #       type_combi = str_remove(last_type, regex = concatenate("^(?", previous_type, "\"))
 #   type_combi = str_remove(type_combi, regex = ")|(")
 #   sentences_df[len(sentences_df) + 1,] = [combi, type_combi]
-#
+
 #------------------------------------------------------------
-#
+
 ### Example type-combination
-#
+
 # last_word = "looking for world food"
 # previous_word = "im"
 # combi = "im looking for world food"
@@ -95,8 +101,8 @@
 # previous_type = "s"
 # type_combi = "s"
 # sentences_df[9,] = ["im looking for world food", "s"]
-#
 
+#---------------------------------------------------------------
 
 
 
