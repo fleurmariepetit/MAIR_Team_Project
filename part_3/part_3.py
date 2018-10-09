@@ -56,11 +56,13 @@
 
 import pandas as pd
 import numpy as np
-
+import re
 words_and_types = pd.read_csv('wordtype_classification.csv')
 
-inputText = 'im looking for world food troep'.lower().split()
+inputText = 'im looking for world food troep'.lower()
+inputText = re.sub(r'[^\w\s]','',inputText).split()
 
+print (inputText)
 sentence_df = pd.DataFrame({'word': inputText, 'type1': np.nan, 'type2': np.nan, 'type3': np.nan},
                            columns=['word', 'type1', 'type2', 'type3'])
 
