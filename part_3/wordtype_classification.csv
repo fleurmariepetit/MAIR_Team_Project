@@ -111,7 +111,7 @@ iam,s,s/np,
 id,s/(np\s),,
 if,s/s,(s\s)/s,
 im,s,,
-in,(n\n)/np,,
+in,(n\n)/np,(np\np)/np,np/(n\n)
 includes,(np\s)/np,,
 indian,n/n,,
 indonesian,n/n,,

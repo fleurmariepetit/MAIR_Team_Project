@@ -9,7 +9,7 @@ words_and_types = pd.read_csv('wordtype_classification.csv')
 
 maxIterations = 4
 # # Working
-# inputText = 'I\'m looking for Persian food please'.lower()
+inputText = 'I\'m looking for Persian food please'.lower()
 # inputText = 'Can I have an expensive restaurant'.lower()
 # inputText = 'I\'m looking for world food'.lower()
 # inputText = 'What about Chinese food'.lower()
@@ -19,7 +19,7 @@ maxIterations = 4
 # # Almost working
 # inputText = 'What is a cheap restaurant in the south part of town'.lower()
 # inputText = 'Find a Cuban restaurant in the center'.lower()
-inputText = 'I wanna find a cheap restaurant'.lower()
+# inputText = 'I wanna find a cheap restaurant'.lower()
 
 # Not working
 # inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
@@ -30,7 +30,8 @@ inputText = 'I wanna find a cheap restaurant'.lower()
 # inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
 
-input_list = re.sub(r'[^\w\s]', '', inputText).split()
+inputText = re.sub(r'[^\w\s]', '', inputText)
+input_list = inputText.split()
 
 print(input_list)
 sentence_df = pd.DataFrame({'phrase': input_list, 'type1': np.nan, 'type2': np.nan, 'type3': np.nan},
@@ -60,14 +61,13 @@ for i in np.arange(len(input_list)):
 
 print(sentence_df)
 
-# TODO: check if phrase has multiple types. If sentence not reconstructed yet, top up type for phrase with multiple types.
-type_nr = 0
+# TODO: Every iteration check if multiple types for a phrase. If so, and if possible constuct new type for each of the types.
+# TODO: Then, save those alternative types for combined phrases in the columns type1, type2, and type3.
 
-while (not sentence_df["phrase"].str.contains(inputText).any()) & type_nr < 3:
-    type_nr += 1
+while (not sentence_df["phrase"].str.contains(inputText).any()):
     for i in range(len(sentence_df)-1, 0, -1):
         print("------------------------------" + str(i) + "----------------------------------")
-        ccg_type = sentence_df.iloc[i,type_nr]
+        ccg_type = sentence_df.iloc[i,1]
         phrase = sentence_df.iloc[i,0]
         forward = re.search(r"[^\\]\w{1,2}$|\(\w{1,2}(\/|\\)\w{1,2}\)$", ccg_type)
         if not bool(forward):
@@ -75,25 +75,26 @@ while (not sentence_df["phrase"].str.contains(inputText).any()) & type_nr < 3:
             # Remove brackets
             required_backward = required_backward.replace("\(|\)", "")
             if i != 0:
-                prev_type = sentence_df.iloc[i - 1,type_nr]
+                prev_type = sentence_df.iloc[i - 1,1]
                 if prev_type == required_backward:
                     new_type = re.sub(r"^" + prev_type + r"\\", '', ccg_type)
                     new_type = re.sub(r"\(|\)", "", new_type)
                     prev_phrase = sentence_df.iloc[i - 1,0]
                     new_phrase = prev_phrase + " " + phrase
                     sentence_df.iloc[i] = new_phrase, new_type, "NaN", "NaN"
+                    sentence_df.drop(sentence_df.index[i - 1], inplace=True)
                     print(sentence_df)
         elif bool(forward):
             required_forward = re.search(r"\w{1,2}$|\(\w{1,2}(\/|\\)\w{1,2}\)$", ccg_type).group(0)
             # Remove brackets
             required_forward = required_forward.replace("\(|\)", "")
             if i != (len(sentence_df)-1):
-                next_type = sentence_df.iloc[i + 1,type_nr]
+                next_type = sentence_df.iloc[i + 1,1]
                 if next_type == required_forward:
                     new_type = re.sub(r"\/" + next_type + "$", '', ccg_type)
                     new_type = re.sub(r"\(|\)", "", new_type)
                     next_phrase = sentence_df.iloc[i + 1, 0]
                     new_phrase = phrase + " " + next_phrase
                     sentence_df.iloc[i] = new_phrase, new_type, "NaN", "NaN"
+                    sentence_df.drop(sentence_df.index[i + 1], inplace=True)
                     print(sentence_df)
-
