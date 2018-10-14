@@ -60,7 +60,7 @@ for i in np.arange(len(input_list)):
 
 print(sentence_df)
 
-# TODO: check if phrase has multiple types. If sentence not reconstructed yet, top up type for word with multiple types.
+# TODO: check if phrase has multiple types. If sentence not reconstructed yet, top up type for phrase with multiple types.
 type_nr = 0
 
 while (not sentence_df["phrase"].str.contains(inputText).any()) & type_nr < 3:
