@@ -3,9 +3,12 @@
 import pandas as pd
 import numpy as np
 import re
-import Levenshtein as ls
+#import Levenshtein as ls TODO
 
 words_and_types = pd.read_csv('wordtype_classification.csv')
+food_types = pd.read_csv('food_type.csv')
+price_types = pd.read_csv('price_type.csv')
+location_types = pd.read_csv('location_type.csv')
 
 maxIterations = 4
 # # Working
@@ -31,8 +34,13 @@ inputText = 'I wanna find a cheap restaurant'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText).split()
-
 print(inputText)
+
+# Check user preferences
+food_type = list(set(inputText) & set(np.concatenate(food_types.values.tolist(), axis=0 )))
+price_type = list(set(inputText) & set(np.concatenate(price_types.values.tolist(), axis=0 )))
+location_type = list(set(inputText) & set(np.concatenate(location_types.values.tolist(), axis=0 )))
+
 sentence_df = pd.DataFrame({'phrase': inputText, 'type1': np.nan, 'type2': np.nan, 'type3': np.nan},
                            columns=['phrase', 'type1', 'type2', 'type3'])
 
@@ -45,7 +53,7 @@ for i in np.arange(len(inputText)):
     if not word in words_and_types["Word"].values:
         for j in np.arange(len(words_and_types)):
             Word = words_and_types["Word"].iloc[j]
-            words_and_types["Distance"].iloc[j] = ls.distance(Word, word)
+            #words_and_types["Distance"].iloc[j] = ls.distance(Word, word) TODO
 
         min_dist = words_and_types["Distance"].min()
         types = words_and_types.loc[words_and_types["Distance"] == min_dist].iloc[0]
@@ -58,11 +66,8 @@ for i in np.arange(len(inputText)):
     sentence_df['type2'].iloc[i] = types.iloc[2]
     sentence_df['type3'].iloc[i] = types.iloc[3]
 
-print(sentence_df)
-
 # Reverse the order of the data frame
 recent_Iteration = sentence_df.iloc[::-1]
-print(recent_Iteration)
 
 sentence_finished = False
 iterations_list = []
@@ -96,9 +101,6 @@ while not sentence_finished:
         if check_forward_slash:
             # Check if its not the last word, length instead of index because data frame starts at 0
             if i != (len(recent_Iteration) - 1):
-                # TODO: Here I remove everything that is between brackets, this should be changed to remove everything
-                # from the FIRST brackets, otherwise errors can occur with types like '(np\s)/(np\s)' This is not that
-                # important though I guess. DONE
                 # Checking request value of next word, where the next word is in fact the previous word in the sentence
                 # TODO: Check for the multiple options that can get requested - The selected request type then has to be saved for a later use
                 next_requested_type = re.sub(r'^\([^)]*\)', '', recent_Iteration["type1"].iloc[i + 1])
@@ -115,11 +117,8 @@ while not sentence_finished:
                         # Removing parentheses
                         newType = re.sub(r'^\(|\)$', '', newType)
                         # Replace the next word with the new information and remove current word. We also have to break the for loop because of index errors.
-                        iteration_DF['phrase'].iloc[i + 1] = concatenation
-                        iteration_DF['type1'].iloc[i + 1] = newType
-                        iteration_DF['type2'].iloc[i + 1] = ''
-                        iteration_DF['type3'].iloc[i + 1] = ''
-                        iteration_DF['concatNumber'].iloc[i + 1] = iteration_DF['concatNumber'].iloc[i] + 1
+
+                        iteration_DF.iloc[i + 1] = concatenation,newType,'','', iteration_DF['concatNumber'].iloc[i] + 1
 
                         iteration_DF = iteration_DF.drop(iteration_DF.index[i])
                         iteration_successful = True
@@ -145,12 +144,7 @@ while not sentence_finished:
                         newType = re.sub(r'^\(|\)$', '', newType)
                         # Replace the next word with the new information and remove current word. We also have to break
                         # the for loop because of index errors.
-                        iteration_DF['phrase'].iloc[i] = concatenation
-                        iteration_DF['type1'].iloc[i] = newType
-                        iteration_DF['type2'].iloc[i] = ''
-                        iteration_DF['type3'].iloc[i] = ''
-                        iteration_DF['concatNumber'].iloc[i] = iteration_DF['concatNumber'].iloc[i] + 1
-
+                        iteration_DF.iloc[i] = concatenation,newType,'','', iteration_DF['concatNumber'].iloc[i] + 1
                         iteration_DF = iteration_DF.drop(iteration_DF.index[i + 1])
                         iteration_successful = True
 
@@ -173,3 +167,7 @@ while not sentence_finished:
 for iteration in iterations_list:
     print('~~~~~~~~~~~ Iteration '+str(iteration[0])+' ~~~~~~~~~~~~~')
     print(iteration[1])
+
+print('Food type preference:' + str(food_type))
+print('Price preference:' + str(price_type))
+print('Location preference:' + str(location_type))
