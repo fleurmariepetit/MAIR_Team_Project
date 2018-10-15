@@ -4,7 +4,7 @@ import math
 import pandas as pd
 import numpy as np
 import re
-#import Levenshtein as ls
+import Levenshtein as ls
 
 # Disable warning about copy in data frame
 pd.options.mode.chained_assignment = None
@@ -35,10 +35,6 @@ inputText = 'I\'m looking for an expensive restaurant and it should serve intern
 #inputText = 'I\'m looking for a restaurant in the center'.lower()
 #inputText = 'Find a Cuban restaurant in the center'.lower()
 
-
-
-
-
 inputText = re.sub(r'[^\w\s]', '', inputText).split()
 print(inputText)
 
@@ -59,7 +55,7 @@ for i in np.arange(len(inputText)):
     if not word in words_and_types["Word"].values:
         for j in np.arange(len(words_and_types)):
             Word = words_and_types["Word"].iloc[j]
-            # words_and_types["Distance"].iloc[j] = ls.distance(Word, word) TODO
+            words_and_types["Distance"].iloc[j] = ls.distance(Word, word)
 
         min_dist = words_and_types["Distance"].min()
         types = words_and_types.loc[words_and_types["Distance"] == min_dist].iloc[0]
