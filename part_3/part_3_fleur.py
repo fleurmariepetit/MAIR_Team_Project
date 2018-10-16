@@ -4,6 +4,7 @@ import numpy as np
 import math
 import re
 import Levenshtein as ls
+import itertools
 
 words_and_types = pd.read_csv('wordtype_classification.csv')
 
@@ -20,12 +21,9 @@ words_and_types = pd.read_csv('wordtype_classification.csv')
 # inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
 # inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
-
-
-# # Use different type-combination
-#inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
-#inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
-#inputText = 'I would like a cheap restaurant in the west part of town'.lower()
+# inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
+# inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
+# inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText)
 input_list = inputText.split()
@@ -80,24 +78,21 @@ type_tries = 0
 max_tries = len(original_df) * 10
 sentence_df = prep_s_def(input_list)[:]
 sentence_finished = False
-while (not sentence_finished) & (tries < max_tries) & (k < 5):
+list_df = original_df.iloc[:,1:].values.tolist()
+for s in range(0, len(list_df) - 1):
+    list_df[s] = [typ for typ in list_df[s] if not typ == "NA"]
+print(list_df)
+poss_combs = list(itertools.product(*list_df))
+while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
+    tries += 1
     ccg_type, phrase, backward, forward, last_one, required_backward, prev_type, new_type, \
         required_forward, next_type, sentence_df = (None,)*11
     type_tries = 0
     sentence_df = prep_s_def(input_list)[:]
     i = len(original_df) - 1
     indexes_newtypes = np.where(sentence_df["type2"] != "NA")[0]
-    if (k == 2):
-        index_newtype = indexes_newtypes[0]
-        sentence_df.iloc[index_newtype, 1] = sentence_df.iloc[index_newtype, 2]
-    elif (k == 3) & (len(indexes_newtypes) > 1):
-        index_newtype = indexes_newtypes[1]
-        sentence_df.iloc[index_newtype, 1] = sentence_df.iloc[index_newtype, 2]
-    elif (k == 4) &  (len(indexes_newtypes) > 1):
-        index_newtype1 = indexes_newtypes[0]
-        sentence_df.iloc[index_newtype1, 1] = sentence_df.iloc[index_newtype1, 2]
-        index_newtype2 = indexes_newtypes[1]
-        sentence_df.iloc[index_newtype2, 1] = sentence_df.iloc[index_newtype2, 2]
+    if (k > 0):
+        sentence_df["type1"] = poss_combs[k]
     k += 1
     while (not sentence_finished) & (type_tries < max_tries/3):
         if sentence_df["phrase"].str.contains(inputText).any():
