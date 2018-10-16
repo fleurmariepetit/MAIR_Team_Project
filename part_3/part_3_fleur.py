@@ -16,16 +16,16 @@ words_and_types = pd.read_csv('wordtype_classification.csv')
 # inputText = 'I want a restaurant serving Swedish food'.lower()
 # inputText = 'I want a restaurant that serves world food'.lower()
 # inputText = 'I wanna find a cheap restaurant'.lower()
+# inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
+# inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
+# inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
+# inputText = 'I\'m looking for a restaurant in the center'.lower()
 
 
 # # Use different type-combination
-#inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
 #inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
-#inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-#inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 #inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
 #inputText = 'I would like a cheap restaurant in the west part of town'.lower()
-#inputText = 'I\'m looking for a restaurant in the center'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText)
 input_list = inputText.split()
@@ -57,8 +57,8 @@ def prep_s_def(input_list):
         sentence_df['type2'].iloc[i] = types.iloc[2]
         sentence_df['type3'].iloc[i] = types.iloc[3]
 
-    for k in range(0, len(sentence_df)):
-        sentence_df.loc[k] = sentence_df.loc[k].fillna(sentence_df.loc[k, "type1"])
+    for m in range(0, len(sentence_df)):
+        sentence_df.loc[m] = sentence_df.loc[m].fillna("NA")
 
     sentence_df["type1"] = [re.sub(r'\/', 'FORW', x) for x in sentence_df["type1"]]
     sentence_df["type1"] = [re.sub(r'\\', 'BACK', x) for x in sentence_df["type1"]]
@@ -72,26 +72,39 @@ def prep_s_def(input_list):
 # TODO: Then, save those alternative types for combined phrases in the columns type1, type2, and type3.
 original_df = prep_s_def(input_list)
 i = len(original_df) - 1
-j = 0
+j = 1
+k = 0
 second_try = False
 tries = 0
 type_tries = 0
 max_tries = len(original_df) * 10
 sentence_df = prep_s_def(input_list)[:]
 sentence_finished = False
-while (j < 3) & (not sentence_finished) & (tries < max_tries):
-    if sentence_df["phrase"].str.contains(inputText).any():
-        sentence_finished = True
+while (not sentence_finished) & (tries < max_tries) & (k < 5):
     ccg_type, phrase, backward, forward, last_one, required_backward, prev_type, new_type, \
         required_forward, next_type, sentence_df = (None,)*11
-    j += 1
     type_tries = 0
-    sentence_df = original_df[:]
+    sentence_df = prep_s_def(input_list)[:]
     i = len(original_df) - 1
-    print("-----------------------type_nr:", str(j), "--------------------------")
+    indexes_newtypes = np.where(sentence_df["type2"] != "NA")[0]
+    if (k == 2):
+        index_newtype = indexes_newtypes[0]
+        sentence_df.iloc[index_newtype, 1] = sentence_df.iloc[index_newtype, 2]
+    elif (k == 3) & (len(indexes_newtypes) > 1):
+        index_newtype = indexes_newtypes[1]
+        sentence_df.iloc[index_newtype, 1] = sentence_df.iloc[index_newtype, 2]
+    elif (k == 4) &  (len(indexes_newtypes) > 1):
+        index_newtype1 = indexes_newtypes[0]
+        sentence_df.iloc[index_newtype1, 1] = sentence_df.iloc[index_newtype1, 2]
+        index_newtype2 = indexes_newtypes[1]
+        sentence_df.iloc[index_newtype2, 1] = sentence_df.iloc[index_newtype2, 2]
+    k += 1
     while (not sentence_finished) & (type_tries < max_tries/3):
+        if sentence_df["phrase"].str.contains(inputText).any():
+            sentence_finished = True
         type_tries += 1
-        print("------------------------------" + str(i) + "----------------------------------")
+        print("-------------------------------" + str(i) + "-----------------------------------")
+        print("----------------------------type_combi:", str(k - 1), "-------------------------------")
         ccg_type = sentence_df.iloc[i, j]
         phrase = sentence_df.iloc[i, 0]
         backward = re.search(r"^((\w{1,2})|(\(\w{1,2}((FORW)|(BACK))\w{1,2}\)))(BACK)", ccg_type)
