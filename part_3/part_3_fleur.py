@@ -27,10 +27,10 @@ words_and_types = pd.read_csv('wordtype_classification.csv')
 #inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 #inputText = 'I\'m looking for a restaurant in the center'.lower()
 
-def prep_s_def(inputText):
-    inputText = re.sub(r'[^\w\s]', '', inputText)
-    input_list = inputText.split()
+inputText = re.sub(r'[^\w\s]', '', inputText)
+input_list = inputText.split()
 
+def prep_s_def(input_list):
     print(input_list)
     sentence_df = pd.DataFrame({'phrase': input_list, 'type1': np.nan, 'type2': np.nan, 'type3': np.nan},
                                columns=['phrase', 'type1', 'type2', 'type3'])
@@ -70,22 +70,26 @@ def prep_s_def(inputText):
 
 # TODO: Every iteration check if multiple types for a phrase. If so, and if possible constuct new type for each of the types.
 # TODO: Then, save those alternative types for combined phrases in the columns type1, type2, and type3.
-original_df = prep_s_def(inputText)
+original_df = prep_s_def(input_list)
 i = len(original_df) - 1
 j = 0
 second_try = False
 tries = 0
 type_tries = 0
 max_tries = len(original_df) * 10
-while (j < 3) & (not sentence_df["phrase"].str.contains(inputText).any()) & (tries < max_tries):
-    del ccg_type, phrase, backward, forward, last_one, required_backward, prev_type, new_type, \
-        required_forward, next_type, sentence_df
+sentence_df = prep_s_def(input_list)[:]
+sentence_finished = False
+while (j < 3) & (not sentence_finished) & (tries < max_tries):
+    if sentence_df["phrase"].str.contains(inputText).any():
+        sentence_finished = True
+    ccg_type, phrase, backward, forward, last_one, required_backward, prev_type, new_type, \
+        required_forward, next_type, sentence_df = (None,)*11
     j += 1
     type_tries = 0
     sentence_df = original_df[:]
     i = len(original_df) - 1
     print("-----------------------type_nr:", str(j), "--------------------------")
-    while (not sentence_df["phrase"].str.contains(inputText).any()) & (type_tries < max_tries/3):
+    while (not sentence_finished) & (type_tries < max_tries/3):
         type_tries += 1
         print("------------------------------" + str(i) + "----------------------------------")
         ccg_type = sentence_df.iloc[i, j]
