@@ -22,8 +22,8 @@ maxIterations = 10
 #inputText = 'What about Chinese food'.lower()
 #inputText = 'I want a restaurant serving Swedish food'.lower()
 #inputText = 'I want a restaurant that serves world food'.lower()
-inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-#inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
+#inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
+inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
 #inputText = 'I wanna find a cheap restaurant'.lower()
 
 # # Almost working
@@ -70,6 +70,8 @@ for i in np.arange(len(inputText)):
 
 # Reverse the order of the data frame
 recent_Iteration = sentence_df.iloc[::-1]
+
+print(recent_Iteration)
 
 sentence_finished = False
 iterations_list = []

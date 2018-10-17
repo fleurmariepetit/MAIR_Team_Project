@@ -3,6 +3,8 @@ import queue
 import re
 import numpy as np
 import copy
+import matplotlib.pyplot as plt
+import networkx as nx
 
 
 class Phrase:
@@ -42,7 +44,7 @@ class Phrase:
 
                 return Phrase(text=concatenation, type1=first_type, type2=second_type, type3=third_type,
                               left_phrase=phrase,
-                              right_phrase=self, elimination_type='Forward')
+                              right_phrase=self, elimination_type='/E')
         return None
 
     def backward_elimination(self, phrase):
@@ -72,7 +74,7 @@ class Phrase:
 
                 return Phrase(text=concatenation, type1=first_type, type2=second_type, type3=third_type,
                               left_phrase=self,
-                              right_phrase=phrase, elimination_type='Backward')
+                              right_phrase=phrase, elimination_type='\\E')
         return None
 
     def get_forward_requests(self):
@@ -114,28 +116,84 @@ class Phrase:
         return self.text
 
 
-# Loading of stuff
+# Recursive method to get a textual representation of the nodes in the tree and how they are connected
+def traverse(phrase):
+    if (str(phrase.left_phrase) != 'None'):
+        edges.append((str(phrase), str(phrase.left_phrase)))
+        traverse(phrase.left_phrase)
+    if (str(phrase.right_phrase) != 'None'):
+        edges.append((str(phrase), str(phrase.right_phrase)))
+        traverse(phrase.right_phrase)
+    return
+
+
+# https://stackoverflow.com/questions/29586520/can-one-get-hierarchical-graphs-from-networkx-with-python-3
+# Needed for drawing of the canvas in the end
+def hierarchy_pos(G, root, levels=None, width=1., height=1.):
+    '''If there is a cycle that is reachable from root, then this will see infinite recursion.
+       G: the graph
+       root: the root node
+       levels: a dictionary
+               key: level number (starting from 0)
+               value: number of nodes in this level
+       width: horizontal space allocated for drawing
+       height: vertical space allocated for drawing'''
+    TOTAL = "total"
+    CURRENT = "current"
+
+    def make_levels(levels, node=root, currentLevel=0, parent=None):
+        """Compute the number of nodes for each level
+        """
+        if not currentLevel in levels:
+            levels[currentLevel] = {TOTAL: 0, CURRENT: 0}
+        levels[currentLevel][TOTAL] += 1
+        neighbors = G.neighbors(node)
+        for neighbor in neighbors:
+            if not neighbor == parent:
+                levels = make_levels(levels, neighbor, currentLevel + 1, node)
+        return levels
+
+    def make_pos(pos, node=root, currentLevel=0, parent=None, vert_loc=0):
+        dx = 1 / levels[currentLevel][TOTAL]
+        left = dx / 2
+        pos[node] = ((left + dx * levels[currentLevel][CURRENT]) * width, vert_loc)
+        levels[currentLevel][CURRENT] += 1
+        neighbors = G.neighbors(node)
+        for neighbor in neighbors:
+            if not neighbor == parent:
+                pos = make_pos(pos, neighbor, currentLevel + 1, node, vert_loc - vert_gap)
+        return pos
+
+    if levels is None:
+        levels = make_levels({})
+    else:
+        levels = {l: {TOTAL: levels[l], CURRENT: 0} for l in levels}
+    vert_gap = height / (max([l for l in levels]) + 1)
+    return make_pos({})
+
+
+# Loading of data
 words_and_types = pd.read_csv('wordtype_classification.csv')
 
-# # Working
-#inputText = 'I\'m looking for Persian food please'.lower()
-#inputText = 'Can I have an expensive restaurant'.lower()
-#inputText = 'I\'m looking for world food'.lower()
-#inputText = 'What about Chinese food'.lower()
-#inputText = 'I want a restaurant serving Swedish food'.lower()
-#inputText = 'I want a restaurant that serves world food'.lower()
-#inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-#inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
-#inputText = 'I wanna find a cheap restaurant'.lower()
-#inputText = 'What is a cheap restaurant in the south part of town'.lower()
-#inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
-#inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
-#inputText = 'I\'m looking for a restaurant in the center'.lower()
-#inputText = 'Find a Cuban restaurant in the center'.lower()
+# Working phrases
+# inputText = 'I\'m looking for Persian food please'.lower()
+# inputText = 'Can I have an expensive restaurant'.lower()
+# inputText = 'I\'m looking for world food'.lower()
+# inputText = 'What about Chinese food'.lower()
+# inputText = 'I want a restaurant serving Swedish food'.lower()
+# inputText = 'I want a restaurant that serves world food'.lower()
+# inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
+# inputText = 'I wanna find a cheap restaurant'.lower()
+# inputText = 'What is a cheap restaurant in the south part of town'.lower()
+# inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
+# inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
+# inputText = 'I\'m looking for a restaurant in the center'.lower()
+# inputText = 'Find a Cuban restaurant in the center'.lower()
+inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
 
-# # not working?
-inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
-#inputText = 'I would like a cheap restaurant in the west part of town'.lower()
+# Not working phrases
+# inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
+# inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText).split()
 
@@ -143,18 +201,17 @@ startingSentence = []
 
 # Translating the words with types to class instances
 for word in inputText:
-    # TODO error checking for non existing words
+    # TODO error checking for non existing words and implement Levenshtein
     types = words_and_types.loc[words_and_types['Word'] == word].iloc[0]
     startingSentence.append(
         Phrase(text=word, type1=types.iloc[1], type2=types.iloc[2], type3=types.iloc[3], left_phrase=None,
                right_phrase=None, elimination_type=None))
 
-# Creating a queue. Items can put into the queue, when you .get() the queue you get an item by the FIFO(first in, first out) method. The item is then removed from the queue
+# Items can put into the queue, when you .get() the queue you get an item by the FIFO method (first in, first out). The item is then removed from the queue
 sentence_queue = queue.Queue()
 sentence_queue.put(startingSentence)
 
 finished_trees = []
-count = 0
 while not sentence_queue.empty():
     sentence_to_process = sentence_queue.get()
 
@@ -169,14 +226,14 @@ while not sentence_queue.empty():
             newSentence = copy.deepcopy(sentence_to_process)
             newSentence[i] = newPhrase
             del newSentence[i + 1]
+            sentence_queue.put(newSentence)
 
-            # temp
+            ''''' This code can be used to see the steps the system makes, useful for debugging sentences that won't complete. Don't forget to put this code in the backward elimination as well
             s = ''
             for sent in newSentence:
                 s = s + ',' + sent.text
             print('sentence: ' + s)
-
-            sentence_queue.put(newSentence)
+            '''''
 
     # Do backward elimination.
     for i in np.arange(len(sentence_to_process)):
@@ -188,5 +245,16 @@ while not sentence_queue.empty():
             del newSentence[i - 1]
             sentence_queue.put(newSentence)
 
-    count += 1
-print(len(finished_trees))
+print('Amount of trees generated:' + str(len(finished_trees)))
+
+edges = []
+
+# TODO now the first tree which was done is chosen. This should change to the tree with the least distance between the key-value for user preference
+traverse(finished_trees[0][0])
+
+# Drawing of the end result on the canvas
+G = nx.Graph()
+G.add_edges_from(edges)
+pos = hierarchy_pos(G, edges[0][0])
+nx.draw(G, pos=pos, with_labels=True, node_color='w')
+plt.show()
