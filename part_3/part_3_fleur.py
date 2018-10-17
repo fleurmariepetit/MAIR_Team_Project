@@ -1,3 +1,6 @@
+## We are currently working on a new-algorithm in order to parse disjoint subtrees for user preferences.
+## This algorithm works for all sentences, but the user preference subtrees are not disjoint.
+
 ## part_3
 import pandas as pd
 import numpy as np
@@ -79,7 +82,7 @@ max_tries = len(original_df) * 10
 sentence_df = prep_s_def(input_list)[:]
 sentence_finished = False
 list_df = original_df.iloc[:,1:].values.tolist()
-for s in range(0, len(list_df) - 1):
+for s in range(0, len(list_df)):
     list_df[s] = [typ for typ in list_df[s] if not typ == "NA"]
 print(list_df)
 poss_combs = list(itertools.product(*list_df))
