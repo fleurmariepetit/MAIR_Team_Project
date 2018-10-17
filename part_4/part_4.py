@@ -10,6 +10,7 @@ restaurants = []
 phones = []
 adresses = []
 postcodes = []
+speech_act = ""
 
 for row in restaurant_info:
     #if all of the criteria are provided
@@ -39,6 +40,9 @@ if len(restaurants) > 10:
 #if there are no options in the data base
 if len(restaurants) == 0:
     print('Sorry i could not find a restaurant with your preferences, do you have something else you would like?')
+
+if speech_act == 'bye':
+    exit()
 
 
 
