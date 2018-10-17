@@ -1,6 +1,7 @@
 
 # Created by https://www.gitignore.io/api/python,pycharm+iml
 
+.idea/
 vcs.xml
 # Data set
 /dstc2_test
