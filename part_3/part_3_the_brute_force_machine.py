@@ -2,6 +2,7 @@ import pandas as pd
 import queue
 import re
 import numpy as np
+import copy
 
 
 class Phrase:
@@ -38,7 +39,6 @@ class Phrase:
                     second_type = new_types[1]
                 if len(new_types) > 2:
                     third_type = new_types[2]
-                print(concatenation)
 
                 return Phrase(text=concatenation, type1=first_type, type2=second_type, type3=third_type,
                               left_phrase=phrase,
@@ -69,7 +69,6 @@ class Phrase:
                     second_type = new_types[1]
                 if len(new_types) > 2:
                     third_type = new_types[2]
-                print(concatenation)
 
                 return Phrase(text=concatenation, type1=first_type, type2=second_type, type3=third_type,
                               left_phrase=self,
@@ -118,7 +117,26 @@ class Phrase:
 # Loading of stuff
 words_and_types = pd.read_csv('wordtype_classification.csv')
 
-inputText = 'I want a restaurant serving Swedish food'.lower()
+# # Working
+#inputText = 'I\'m looking for Persian food please'.lower()
+#inputText = 'Can I have an expensive restaurant'.lower()
+#inputText = 'I\'m looking for world food'.lower()
+#inputText = 'What about Chinese food'.lower()
+#inputText = 'I want a restaurant serving Swedish food'.lower()
+#inputText = 'I want a restaurant that serves world food'.lower()
+#inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
+#inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
+#inputText = 'I wanna find a cheap restaurant'.lower()
+#inputText = 'What is a cheap restaurant in the south part of town'.lower()
+#inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
+#inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
+#inputText = 'I\'m looking for a restaurant in the center'.lower()
+#inputText = 'Find a Cuban restaurant in the center'.lower()
+
+# # not working?
+inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
+#inputText = 'I would like a cheap restaurant in the west part of town'.lower()
+
 inputText = re.sub(r'[^\w\s]', '', inputText).split()
 
 startingSentence = []
@@ -136,6 +154,7 @@ sentence_queue = queue.Queue()
 sentence_queue.put(startingSentence)
 
 finished_trees = []
+count = 0
 while not sentence_queue.empty():
     sentence_to_process = sentence_queue.get()
 
@@ -144,25 +163,30 @@ while not sentence_queue.empty():
         finished_trees.append(sentence_to_process)
 
     # Do forward elimination to all the words EXCEPT last word. When you get a successful elimination it will create a new sentence with the combined phrases and add it to the queue
-    for i in np.arange(len(sentence_to_process) - 2):
+    for i in np.arange(len(sentence_to_process) - 1):
         newPhrase = sentence_to_process[i + 1].forward_elimination(sentence_to_process[i])
-
         if newPhrase is not None:
-            newSentence = sentence_to_process
+            newSentence = copy.deepcopy(sentence_to_process)
             newSentence[i] = newPhrase
             del newSentence[i + 1]
+
+            # temp
+            s = ''
+            for sent in newSentence:
+                s = s + ',' + sent.text
+            print('sentence: ' + s)
+
             sentence_queue.put(newSentence)
 
-    # Do backward elimination. TODO I'm not sure but it looks a bit like it's possible to merge the forward and elimination methods in the class.
-    for i in np.arange(len(sentence_to_process) - 2):
-        newPhrase = sentence_to_process[i].backward_elimination(sentence_to_process[i + 1])
+    # Do backward elimination.
+    for i in np.arange(len(sentence_to_process)):
+        newPhrase = sentence_to_process[i - 1].backward_elimination(sentence_to_process[i])
 
         if newPhrase is not None:
-            newSentence = sentence_to_process
+            newSentence = copy.deepcopy(sentence_to_process)
             newSentence[i] = newPhrase
-            del newSentence[i + 1]
+            del newSentence[i - 1]
             sentence_queue.put(newSentence)
 
-# In the end the queue should be empty and all the possible trees should be in the finished_trees array.
-# Printing the trees can be done by looping through the nested 'left_phrase' and 'right_phrase' from all the nodes until 'None' is found (this is set for the individual words)
-# I think drawing the tree on a canvas could be fairly easy by using this nested structure as well but I have little expirience drawing in python so I'm not sure.
+    count += 1
+print(len(finished_trees))
