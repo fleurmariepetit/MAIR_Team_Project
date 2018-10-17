@@ -4,7 +4,7 @@ import math
 import pandas as pd
 import numpy as np
 import re
-import Levenshtein as ls
+#import Levenshtein as ls
 
 # Disable warning about copy in data frame
 pd.options.mode.chained_assignment = None
@@ -55,7 +55,7 @@ for i in np.arange(len(inputText)):
     if not word in words_and_types["Word"].values:
         for j in np.arange(len(words_and_types)):
             Word = words_and_types["Word"].iloc[j]
-            words_and_types["Distance"].iloc[j] = ls.distance(Word, word)
+            #words_and_types["Distance"].iloc[j] = ls.distance(Word, word)
 
         min_dist = words_and_types["Distance"].min()
         types = words_and_types.loc[words_and_types["Distance"] == min_dist].iloc[0]
@@ -85,6 +85,8 @@ iteration_number = 0
 total_iteration = 1
 iterations_list.append([0, recent_Iteration])
 check_forward_slash = True
+
+eliminations = []
 
 # Begin the tree algorithm
 while not sentence_finished:
@@ -148,6 +150,8 @@ while not sentence_finished:
                     iteration_successful = True
 
                     iterations_list.append([iteration_number, iteration_DF])
+
+                    eliminations.append([recent_Iteration['phrase'].iloc[i + 1], recent_Iteration['phrase'].iloc[i], '/'])
                     break
         else:
             if i != (len(recent_Iteration) - 1):
@@ -199,6 +203,8 @@ while not sentence_finished:
                     iteration_successful = True
 
                     iterations_list.append([iteration_number, iteration_DF])
+                    eliminations.append([recent_Iteration['phrase'].iloc[i + 1], recent_Iteration['phrase'].iloc[i], '\\'])
+
                     break
 
     recent_Iteration = iteration_DF
@@ -221,3 +227,4 @@ for iteration in iterations_list:
 print('Food type preference:' + str(food_type))
 print('Price preference:' + str(price_type))
 print('Location preference:' + str(location_type))
+
