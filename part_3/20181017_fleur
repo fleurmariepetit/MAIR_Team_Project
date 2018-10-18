@@ -154,4 +154,5 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
             print("Een stap terug in de zin:" + str(i))
         elif (i==0) & (len(sentence_df) != 1):
             i += 1
+            print("Een stap verder in de zin:" + str(i))
         print(sentence_df)
