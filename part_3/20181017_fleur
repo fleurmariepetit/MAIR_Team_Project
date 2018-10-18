@@ -13,7 +13,7 @@ words_and_types = pd.read_csv('part_3/20181017_newtypes.csv')
 
 # # Working
 # inputText = 'I\'m looking for Persian food please'.lower()
-# inputText = 'Can I have an expensive restaurant'.lower()
+inputText = 'Can I have an expensive restaurant'.lower()
 # inputText = 'I\'m looking for world food'.lower()
 # inputText = 'What about Chinese food'.lower()
 # inputText = 'What is a cheap restaurant in the south part of town'.lower()
