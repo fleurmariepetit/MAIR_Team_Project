@@ -8,7 +8,7 @@ import networkx as nx
 
 
 class Phrase:
-    def __init__(self, text, type1, type2, type3, left_phrase, right_phrase, elimination_type):
+    def __init__(self, text, type1, type2, type3, left_phrase, right_phrase, elimination_type, build_history):
         self.self = self
         self.text = text
         self.type1 = type1
@@ -17,6 +17,7 @@ class Phrase:
         self.left_phrase = left_phrase
         self.right_phrase = right_phrase
         self.elimination_type = elimination_type
+        self.build_history = build_history
 
     def forward_elimination(self, phrase):
         requested_types, original_types = phrase.get_forward_requests()
@@ -42,9 +43,12 @@ class Phrase:
                 if len(new_types) > 2:
                     third_type = new_types[2]
 
+                build_history = phrase.text + '(' + str(phrase.get_types_array()) + ') + ' + self.text + '(' + str(
+                    self.get_types_array()) + ')' + ' created: "' + phrase.text + ' ' + self.text + '" (' + str(
+                    new_types) + ')'
                 return Phrase(text=concatenation, type1=first_type, type2=second_type, type3=third_type,
                               left_phrase=phrase,
-                              right_phrase=self, elimination_type='/E')
+                              right_phrase=self, elimination_type='/E', build_history=build_history)
         return None
 
     def backward_elimination(self, phrase):
@@ -72,9 +76,12 @@ class Phrase:
                 if len(new_types) > 2:
                     third_type = new_types[2]
 
+                build_history = self.text + '(' + str(self.get_types_array()) + ') + ' + phrase.text + '(' + str(
+                    phrase.get_types_array()) + ')' + ' created: "' + self.text + ' ' + phrase.text + '" (' + str(
+                    new_types) + ')'
                 return Phrase(text=concatenation, type1=first_type, type2=second_type, type3=third_type,
                               left_phrase=self,
-                              right_phrase=phrase, elimination_type='\\E')
+                              right_phrase=phrase, elimination_type='\\E', build_history=build_history)
         return None
 
     def get_forward_requests(self):
@@ -111,6 +118,18 @@ class Phrase:
     def get_types_array(self):
         return [self.type1, self.type2, self.type3]
 
+    # To check if the tree (or part of the tree) contains a leaf consisting of the key value pair as leafs
+    def contains_key_value_leaf_connection(self, key, value):
+        if str(self.left_phrase) != 'None' and str(self.right_phrase) != 'None':
+            if (self.left_phrase.text == key and self.right_phrase.text == value) or (
+                    self.left_phrase.text == value and self.right_phrase.text == key):
+                return True
+            elif self.left_phrase.contains_key_value_leaf_connection(key, value):
+                return True
+            elif self.right_phrase.contains_key_value_leaf_connection(key, value):
+                return True
+        return False
+
     # This is the to_string function from the class (aka when you print the object)
     def __str__(self):
         return self.text
@@ -118,11 +137,15 @@ class Phrase:
 
 # Recursive method to get a textual representation of the nodes in the tree and how they are connected
 def traverse(phrase):
+    if (phrase.build_history != ''):
+        print(phrase.build_history)
     if (str(phrase.left_phrase) != 'None'):
         edges.append((str(phrase), str(phrase.left_phrase)))
+        labels[(str(phrase), str(phrase.left_phrase))] = ''
         traverse(phrase.left_phrase)
     if (str(phrase.right_phrase) != 'None'):
         edges.append((str(phrase), str(phrase.right_phrase)))
+        labels[(str(phrase), str(phrase.right_phrase))] = ''
         traverse(phrase.right_phrase)
     return
 
@@ -172,8 +195,21 @@ def hierarchy_pos(G, root, levels=None, width=1., height=1.):
     return make_pos({})
 
 
+def draw_image(edges):
+    # Drawing of the end result on the canvas
+    G = nx.Graph()
+    G.add_edges_from(edges)
+    pos = hierarchy_pos(G, edges[0][0])
+    nx.draw(G, pos=pos, with_labels=True, node_color='w')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels, label_pos=0.2)
+    plt.show()
+
+
 # Loading of data
 words_and_types = pd.read_csv('wordtype_classification.csv')
+food_types = pd.read_csv('food_type.csv')
+price_types = pd.read_csv('price_type.csv')
+location_types = pd.read_csv('location_type.csv')
 
 # Working phrases
 # inputText = 'I\'m looking for Persian food please'.lower()
@@ -183,13 +219,13 @@ words_and_types = pd.read_csv('wordtype_classification.csv')
 # inputText = 'I want a restaurant serving Swedish food'.lower()
 # inputText = 'I want a restaurant that serves world food'.lower()
 # inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
-# inputText = 'I wanna find a cheap restaurant'.lower()
-# inputText = 'What is a cheap restaurant in the south part of town'.lower()
-# inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
+#inputText = 'I wanna find a cheap restaurant'.lower()
+#inputText = 'What is a cheap restaurant in the south part of town'.lower()
+#inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
 # inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
-# inputText = 'Find a Cuban restaurant in the center'.lower()
-inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
+inputText = 'Find a Cuban restaurant in the center'.lower()
+#inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
 
 # Not working phrases
 # inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
@@ -205,7 +241,7 @@ for word in inputText:
     types = words_and_types.loc[words_and_types['Word'] == word].iloc[0]
     startingSentence.append(
         Phrase(text=word, type1=types.iloc[1], type2=types.iloc[2], type3=types.iloc[3], left_phrase=None,
-               right_phrase=None, elimination_type=None))
+               right_phrase=None, elimination_type=None, build_history=''))
 
 # Items can put into the queue, when you .get() the queue you get an item by the FIFO method (first in, first out). The item is then removed from the queue
 sentence_queue = queue.Queue()
@@ -246,15 +282,51 @@ while not sentence_queue.empty():
             sentence_queue.put(newSentence)
 
 print('Amount of trees generated:' + str(len(finished_trees)))
-
+finished_trees = [item[0] for item in finished_trees]
+labels = {}
 edges = []
 
-# TODO now the first tree which was done is chosen. This should change to the tree with the least distance between the key-value for user preference
-traverse(finished_trees[0][0])
+# Types of user preferences that are present in some form in the user input
+food_preference = list(set(inputText) & set(np.concatenate(food_types.values.tolist(), axis=0)))
+price_preference = list(set(inputText) & set(np.concatenate(price_types.values.tolist(), axis=0)))
+location_preference = list(set(inputText) & set(np.concatenate(location_types.values.tolist(), axis=0)))
 
-# Drawing of the end result on the canvas
-G = nx.Graph()
-G.add_edges_from(edges)
-pos = hierarchy_pos(G, edges[0][0])
-nx.draw(G, pos=pos, with_labels=True, node_color='w')
-plt.show()
+possible_trees = []
+
+for tree in finished_trees:
+    add_tree = True
+    if len(food_preference) > 0:
+        add_tree = (tree.contains_key_value_leaf_connection(food_preference[0], 'food')) or (
+            tree.contains_key_value_leaf_connection(food_preference[0], 'restaurant'))
+    if (len(price_preference) > 0) and (add_tree is True):
+        add_tree = (tree.contains_key_value_leaf_connection(price_preference[0], 'priced')) or (
+            tree.contains_key_value_leaf_connection(price_preference[0], 'restaurant'))
+    if (len(location_preference) > 0) and (add_tree is True):
+        add_tree = (tree.contains_key_value_leaf_connection(location_preference[0], 'part')) or (tree.contains_key_value_leaf_connection(location_preference[0], 'the'))
+
+    if (add_tree):
+        possible_trees.append(tree)
+
+print('Amount of trees with correct preference:' + str(len(possible_trees)))
+
+if (len(possible_trees) > 0):
+    traverse(possible_trees[0])
+
+    preferences = ['disjoint / not present', 'disjoint / not present', 'disjoint / not present']
+    if len(food_preference) > 0:
+        preferences[0] = food_preference[0]
+    if (len(price_preference) > 0):
+        preferences[1] = price_preference[0]
+    if (len(location_preference) > 0):
+        preferences[2] = location_preference[0]
+
+    print('Food preference :' + preferences[0])
+    print('Price range: ' + preferences[1])
+    print('Location preference: ' + preferences[2])
+else:
+    traverse(finished_trees[0])
+    print('Food preference: disjoint / not present')
+    print('Price range: disjoint / not present')
+    print('Location preference: disjoint / not present')
+
+draw_image(edges)
