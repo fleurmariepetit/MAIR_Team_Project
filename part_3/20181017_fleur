@@ -29,8 +29,6 @@ words_and_types = pd.read_csv('part_3/20181017_newtypes.csv')
 # inputText = 'I wanna find a cheap restaurant'.lower()
 # inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
 
-
-
 inputText = re.sub(r'[^\w\s]', '', inputText)
 input_list = inputText.split()
 
@@ -145,7 +143,7 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
                     sentence_df.iloc[i,0] = new_phrase
                     sentence_df.iloc[i, j] = new_type
                     sentence_df.drop(sentence_df.index[i + 1], inplace=True)
-        if bool(re.search(r"(B)|(FARD)", sentence_df.iloc[i, j])) & (second_try == False):
+        if bool(re.search(r"(B)|(F)", sentence_df.iloc[i, j])) & (second_try == False):
             second_try = True
             print("Nog een keer met:" + str(i))
         elif (i < len(sentence_df)) & (i > 0):
