@@ -9,7 +9,7 @@ import re
 import Levenshtein as ls
 import itertools
 
-words_and_types = pd.read_csv('wordtype_classification.csv')
+words_and_types = pd.read_csv('20181017_newtypes.csv')
 
 # # Working
 # inputText = 'I\'m looking for Persian food please'.lower()
