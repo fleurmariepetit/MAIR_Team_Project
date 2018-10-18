@@ -23,12 +23,13 @@ words_and_types = pd.read_csv('part_3/20181017_newtypes.csv')
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
 # inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
 # inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
-
-# Fails
+# inputText = 'I would like a cheap restaurant in the west part of town'.lower()
+# inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
+# inputText = 'Find a Cuban restaurant.'.lower()
 # inputText = 'I wanna find a cheap restaurant'.lower()
 # inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-# inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
-# inputText = 'I would like a cheap restaurant in the west part of town'.lower()
+
+
 
 inputText = re.sub(r'[^\w\s]', '', inputText)
 input_list = inputText.split()
@@ -105,11 +106,11 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
         print("----------------------------type_combi:", str(k - 1), "-------------------------------")
         ccg_type = sentence_df.iloc[i, j]
         phrase = sentence_df.iloc[i, 0]
-        backward = re.search(r"^((\w{1,2})|(\(\w{1,2}((F)|(B))\w{1,2}\)))(B)", ccg_type)
-        forward = re.search(r"(F)(\w{1,2}$|(\(\w{1,2}((F)|(B))\w{1,2}\)$))", ccg_type)
+        backward = re.search(r"^(([^(F|B)]{1,2})|(\(.*\)))(B)", ccg_type)
+        forward = re.search(r"(F)([^(F|B)]{1,2}|(\(.*\)))$", ccg_type)
         last_one = i
         if bool(backward):
-            required_backward = re.search(r"^((\w{1,2})|(\(\w{1,2}((F)|(B))\w{1,2}\)))(B)", ccg_type).group(0)
+            required_backward = re.search(r"^(([^(F|B)]{1,2})|(\(.*\)))(B)", ccg_type).group(0)
             required_backward = re.sub("B$", "", required_backward)
             if i != 0:
                 prev_type = sentence_df.iloc[i - 1, j]
@@ -126,7 +127,7 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
                     sentence_df.drop(sentence_df.index[i - 1], inplace=True)
                     i -= 1
         elif bool(forward):
-            required_forward = re.search(r"(F)(\w{1,2}$|(\(\w{1,2}((F)|(B))\w{1,2}\)$))", ccg_type).group(0)
+            required_forward = re.search(r"(F)([^(F|B)]{1,2}|(\(.*\)))$", ccg_type).group(0)
             required_forward = re.sub("^F", "", required_forward)
             if bool(re.search(r"\)$", required_forward)):
                 required_forward = re.sub(r"\)$", '', required_forward)
