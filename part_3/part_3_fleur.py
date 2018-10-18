@@ -131,7 +131,7 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
             if i != (len(sentence_df)-1):
                 next_type = sentence_df.iloc[i + 1, j]
                 if next_type == required_forward:
-                    new_type = re.sub(r"(F)((np)|(pp)|(s)|(n$))", '', ccg_type)
+                    new_type = re.sub(r"(F)((np)|(pp)|(s)|(n$))$", '', ccg_type)
                     new_type = re.sub(r"(F)\(.*\)$", '', new_type)
                     if bool(re.search(r"\)$", new_type)):
                         new_type = re.sub(r"\)$", '', new_type)

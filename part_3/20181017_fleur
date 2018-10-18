@@ -9,7 +9,7 @@ import re
 import Levenshtein as ls
 import itertools
 
-words_and_types = pd.read_csv('20181017_newtypes.csv')
+words_and_types = pd.read_csv('part_3/20181017_newtypes.csv')
 
 # # Working
 # inputText = 'I\'m looking for Persian food please'.lower()
@@ -19,13 +19,15 @@ words_and_types = pd.read_csv('20181017_newtypes.csv')
 # inputText = 'What is a cheap restaurant in the south part of town'.lower()
 # inputText = 'I want a restaurant serving Swedish food'.lower()
 # inputText = 'I want a restaurant that serves world food'.lower()
-# inputText = 'I wanna find a cheap restaurant'.lower()
 # inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
-# inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-# inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
 # inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
 # inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
+
+# Fails
+# inputText = 'I wanna find a cheap restaurant'.lower()
+# inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
+# inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 # inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText)
@@ -69,8 +71,6 @@ def prep_s_def(input_list):
     sentence_df["type3"] = [re.sub(r'\\', 'B', x) for x in sentence_df["type3"]]
     return sentence_df
 
-# TODO: Every iteration check if multiple types for a phrase. If so, and if possible constuct new type for each of the types.
-# TODO: Then, save those alternative types for combined phrases in the columns type1, type2, and type3.
 original_df = prep_s_def(input_list)
 i = len(original_df) - 1
 j = 1
@@ -109,13 +109,16 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
         forward = re.search(r"(F)(\w{1,2}$|(\(\w{1,2}((F)|(B))\w{1,2}\)$))", ccg_type)
         last_one = i
         if bool(backward):
-            required_backward = re.search(r"^\w{1,2}|(^\(\w{1,2}((F)|(B))w{1,2}\))", ccg_type).group(0)
-            required_backward = re.sub("[B]$", "", required_backward)
+            required_backward = re.search(r"^((\w{1,2})|(\(\w{1,2}((F)|(B))\w{1,2}\)))(B)", ccg_type).group(0)
+            required_backward = re.sub("B$", "", required_backward)
             if i != 0:
                 prev_type = sentence_df.iloc[i - 1, j]
                 if prev_type == required_backward:
                     new_type = re.sub(r"^((np)|(pp)|(s)|(n))(B)", '', ccg_type)
-                    new_type = re.sub(r"\(|\)", "", new_type)
+                    new_type = re.sub(r"^\(.*\)(B)", '', new_type)
+                    if bool(re.search(r"\)$", new_type)):
+                        new_type = re.sub(r"\)$", '', new_type)
+                        new_type = re.sub(r"^\(", '', new_type)
                     prev_phrase = sentence_df.iloc[i - 1, 0]
                     new_phrase = prev_phrase + " " + phrase
                     sentence_df.iloc[i, 0] = new_phrase
@@ -123,15 +126,15 @@ while (not sentence_finished) & (tries < max_tries) & (k < len(poss_combs)):
                     sentence_df.drop(sentence_df.index[i - 1], inplace=True)
                     i -= 1
         elif bool(forward):
-            required_forward = re.search(r"\w{1,2}$|\(\w{1,2}((F)|(B))\w{1,2}\)$", ccg_type).group(0)
-            required_forward = re.sub("^[F]", "", required_forward)
+            required_forward = re.search(r"(F)(\w{1,2}$|(\(\w{1,2}((F)|(B))\w{1,2}\)$))", ccg_type).group(0)
+            required_forward = re.sub("^F", "", required_forward)
             if bool(re.search(r"\)$", required_forward)):
                 required_forward = re.sub(r"\)$", '', required_forward)
                 required_forward = re.sub(r"^\(", '', required_forward)
             if i != (len(sentence_df)-1):
                 next_type = sentence_df.iloc[i + 1, j]
                 if next_type == required_forward:
-                    new_type = re.sub(r"(F)((np)|(pp)|(s)|(n$))", '', ccg_type)
+                    new_type = re.sub(r"(F)((np)|(pp)|(s)|(n$))$", '', ccg_type)
                     new_type = re.sub(r"(F)\(.*\)$", '', new_type)
                     if bool(re.search(r"\)$", new_type)):
                         new_type = re.sub(r"\)$", '', new_type)
