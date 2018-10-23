@@ -154,6 +154,8 @@ history = model.fit(trainData, trainLabels, epochs=7, validation_data=(testData,
 # Create a reverse lookup table from the dictionary to search by values instead of keys
 catDictReverseLookup = {v: k for k, v in catDict.items()}
 
+model.save('model.h5')
+
 while True:
     inputSentence = input('Sentence to be categorised: ')
 
