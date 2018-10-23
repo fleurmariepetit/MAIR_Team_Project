@@ -5,7 +5,7 @@ import numpy as np
 import copy
 import matplotlib.pyplot as plt
 import networkx as nx
-
+import Levenshtein as ls
 
 class Phrase:
     def __init__(self, text, type1, type2, type3, left_phrase, right_phrase, elimination_type, build_history):
@@ -220,15 +220,13 @@ location_types = pd.read_csv('location_type.csv')
 # inputText = 'I want a restaurant that serves world food'.lower()
 # inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
 #inputText = 'I wanna find a cheap restaurant'.lower()
-#inputText = 'What is a cheap restaurant in the south part of town'.lower()
+inputText = 'What is a cheap restaurant in the south part of town'.lower()
 #inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
 # inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
-inputText = 'Find a Cuban restaurant in the center'.lower()
+#inputText = 'Find a Cuban restaurant in the center'.lower()
 #inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-
-# Not working phrases
-# inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
+#inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
 # inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText).split()
@@ -237,8 +235,20 @@ startingSentence = []
 
 # Translating the words with types to class instances
 for word in inputText:
-    # TODO error checking for non existing words and implement Levenshtein
-    types = words_and_types.loc[words_and_types['Word'] == word].iloc[0]
+    words_and_types["Distance"] = np.nan
+
+    # Use Levenshtein distance to map mistyped words to the closest word in the vocabulary.
+    if not word in words_and_types["Word"].values:
+        for j in np.arange(len(words_and_types)):
+            Word = words_and_types["Word"].iloc[j]
+            words_and_types["Distance"].iloc[j] = ls.distance(Word, word)
+
+        min_dist = words_and_types["Distance"].min()
+        types = words_and_types.loc[words_and_types["Distance"] == min_dist].iloc[0]
+        word = types.iloc[0]
+    else:
+        types = words_and_types.loc[words_and_types['Word'] == word].iloc[0]
+
     startingSentence.append(
         Phrase(text=word, type1=types.iloc[1], type2=types.iloc[2], type3=types.iloc[3], left_phrase=None,
                right_phrase=None, elimination_type=None, build_history=''))
