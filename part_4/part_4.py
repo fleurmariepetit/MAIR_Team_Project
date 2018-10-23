@@ -101,8 +101,16 @@ def null():
     print(last_said)
     
 def reqalts():
-
+    last_suggested += 1
+    if last_suggested < len(restaurants):
+        give_suggestion(last_suggested)
+    else:
+        print('Sorry there are no other restaurants with your preferences. I will repeat the earlier suggestions.')
+        last_suggested = 0
+        give_suggestion(last_suggested)
+        
 def affirm():
+    
     
 def bye():
     exit()
@@ -128,7 +136,13 @@ def confirm():
     
 def deny():
     
-
+def give_suggestion(last_suggested):
+    # TODO: suggesties moeten prijs, food en area in volgorde van opgeven geven.
+    print (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
+    
+    
+    
+    
 """
 food = input('What type of food would you like?')
 price = input('What is your price range?')
