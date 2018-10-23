@@ -5,7 +5,7 @@ import numpy as np
 import copy
 import matplotlib.pyplot as plt
 import networkx as nx
-import Levenshtein as ls
+import pylev as lv
 
 class Phrase:
     def __init__(self, text, type1, type2, type3, left_phrase, right_phrase, elimination_type, build_history):
@@ -241,11 +241,12 @@ for word in inputText:
     if not word in words_and_types["Word"].values:
         for j in np.arange(len(words_and_types)):
             Word = words_and_types["Word"].iloc[j]
-            words_and_types["Distance"].iloc[j] = ls.distance(Word, word)
+            words_and_types["Distance"].iloc[j] = lv.levenshtein(Word, word)
 
         min_dist = words_and_types["Distance"].min()
         types = words_and_types.loc[words_and_types["Distance"] == min_dist].iloc[0]
         word = types.iloc[0]
+        print('!!!!' +  word)
     else:
         types = words_and_types.loc[words_and_types['Word'] == word].iloc[0]
 
