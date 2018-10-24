@@ -1,6 +1,7 @@
 import csv
 import random
-
+import pandas as pd
+import keras
 
 """
 Print welcome
@@ -11,14 +12,17 @@ respond according to speech act
 # read in restaurant data
 restaurant_info = csv.reader(open("restaurantinfo.csv"), delimiter=",")
 
-# train speech act categorization network
-# TODO: train network 
-# Dit is het eerste deel van part_2
+# load speech act categorization network
+model = keras.models.load_model(model.h5) 
 
 # initialize variables
 speech_act = ""
 last_said = ""
 last_suggested = 0
+
+data = {'types':['food', 'area', 'price'], 'preferences':["","",""], 'order': [9,9,9]}
+preference = pd.DataFrame(data=data)
+
 restaurants = []
 phones = []
 adresses = []
@@ -72,6 +76,7 @@ def inform():
 
     #give result
     if len(restaurants) <= 10 and len(restaurants)>0:
+        # TODO: or all 3 things are specified
         print (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
     
     #if there are to many options and not all of the criteria are provided
@@ -82,8 +87,6 @@ def inform():
     #if there are no options in the data base
     if len(restaurants) == 0:
         print('Sorry i could not find a restaurant with your preferences, do you have something else you would like?')
-
-
 
 def request():
     #TODO: request = input('user: '), we should find a way to recognize the type of request of the user directly. 
@@ -124,24 +127,29 @@ def hello():
     print(last_said)
     
 def negate():
-
+    
+    
 def repeat():
     print(last_said)
     
 def reqmore():
+    print("%s is a %s priced restaurant serving %s food in the %s part of town" % (restaurants[last_suggested], price, food, area))
+    print('Its phone number is ' + phones[last_suggested] + " and its adress is " + adresses[last_suggested] + ' '  + postcodes[last_suggested])
     
 def restart():
-    
+    print('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?')
+
 def confirm():
     
+    
 def deny():
+    
     
 def give_suggestion(last_suggested):
     # TODO: suggesties moeten prijs, food en area in volgorde van opgeven geven.
     print (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
     
-    
-    
+      
     
 """
 food = input('What type of food would you like?')
