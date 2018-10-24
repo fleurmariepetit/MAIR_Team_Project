@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import itertools
 
 import numpy as np
+import json
 from keras.layers import Embedding, LSTM, Dense
 from keras.models import Sequential
 
@@ -106,7 +107,7 @@ def transformLabels(labels):
     return np.array(newTrainLabels)
 
 
-completeDatasetFileName = 'acts_and_utts.txt'
+completeDatasetFileName = 'part_2_optimalisation/acts_and_utts.txt'
 
 trainingSetFileName = 'trainingSet.txt'
 testSetFileName = 'testSet.txt'
@@ -128,12 +129,21 @@ trainLabels = transformLabels(transformResult[1])
 testData = np.array(transformTestset[0])
 testLabels = transformLabels(transformTestset[1])
 
-# Optimalisation
+with open('part_2_optimalisation/catDict.json', 'w') as cd:
+    json.dump(catDict, cd, sort_keys=True, indent=4)
 
+with open('part_2_optimalisation/wordDict.json', 'w') as wd:
+    json.dump(wordDict, wd, sort_keys=True, indent=4)
+
+# Optimalisation
 accuracies = []
 losses = []
 plot_it = False
 
+with open('part_2_optimalisation/catDict.json', 'r') as cd:
+    catDict = json.load(cd)
+with open('part_2_optimalisation/wordDict.json', 'r') as wd:
+    wordDict = json.load(wd)
 
 def fit_lstm(emb_out, lstm_un, lstm_in, dense_in, nr_epoch):
     model = Sequential()
@@ -166,30 +176,33 @@ def fit_lstm(emb_out, lstm_un, lstm_in, dense_in, nr_epoch):
     if plot_it:
         plt.plot(history.history['acc'])
         plt.plot(history.history['val_acc'])
-        plt.title('model accuracy')
-        plt.ylabel('accuracy')
-        plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig('accuracy_{0}-{1}-{2}-{3}-{4}.png'.format(emb_out, lstm_un, lstm_in, dense_in, nr_epoch))
-
-        # summarize history for loss
         plt.plot(history.history['loss'])
         plt.plot(history.history['val_loss'])
-        plt.title('model loss')
+        plt.title('model loss and accuracy')
         plt.ylabel('loss/accuracy')
         plt.xlabel('epoch')
-        plt.legend(['train', 'test'], loc='upper left')
-        plt.savefig('loss{0}{1}{2}{3}{4}.png'.format(emb_out, lstm_un, lstm_in, dense_in, nr_epoch))
+        plt.legend(['train_acc', 'test_acc', 'train_loss', 'test_loss'], loc='upper left')
+        plt.savefig('part_2_optimalisation/accloss_{0}-{1}-{2}-{3}-{4}.png'.format(emb_out, lstm_un, lstm_in, dense_in, nr_epoch))
+        model.save('part_2_optimalisation/model{0}eps.h5'.format(nr_epoch))
+
+        # summarize history for loss
+ #       plt.plot(history.history['loss'])
+ #       plt.plot(history.history['val_loss'])
+ #       plt.title('model loss')
+ #       plt.ylabel('loss/accuracy')
+ #       plt.xlabel('epoch')
+ #       plt.legend(['train', 'test'], loc='upper left')
+ #       plt.savefig('loss{0}{1}{2}{3}{4}.png'.format(emb_out, lstm_un, lstm_in, dense_in, nr_epoch))
 
 
 # Make the list with all the different parameter options. In this case a vary between different combinations
 # of 128, 64, and 32 neurons. They have been tested on 20 epochs. The optimum combination for this test run was
-# emb_out = 128, lstm_un = 128, lstm_in = 32, dense_in = 64. We looked at the graphs of the best configuration
+# emb_out = 128, lstm_un = 64, lstm_in = 128, dense_in = 32. We looked at the graphs of the best configuration
 # for 20 epochs and decided that 7 epochs would be enough. We tested all different combinations again for just 7 epochs.
 # The optimal combination of our test round was emb_out = 128, lstm_un = 128, lstm_in = 128, dense_in = 64.
 # The worst accuracy was for 32, 64, 128, 32, the highest loss for 128, 128, 128, 32, 7.
 neurons = []
-nr_epochs = [7]
+nr_epochs = [20]
 for i in range(5, 8):
     neurons.append(2 ** i)
 hyper_pars = [neurons, neurons, neurons, neurons, nr_epochs]
