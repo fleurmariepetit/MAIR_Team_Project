@@ -31,18 +31,23 @@ restaurants = []
 phones = []
 adresses = []
 postcodes = []
+food_types = pd.read_csv('food_type.csv')
+price_types = pd.read_csv('price_type.csv')
+location_types = pd.read_csv('location_type.csv')
+
 
 # start conversation
-user_input = input('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like? \n')
-
-while speech_act != "bye" and speech_act != "thankyou":
-    # identify speech act
-    #TODO: Find speechact: gebruik user input en getrainde netwerk van part 2
-    speech_act = find_speechact(user_input)
+def conversation():
+    user_input = input('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like? \n')
     
-    # respond to speech act
-    respond_to_user(speech_act)
-    
+    while speech_act != "bye" and speech_act != "thankyou":
+        # identify speech act
+        user_input = re.sub(r'[^\w\s]', '', user_input)
+        speech_act = find_speechact(user_input.lower())
+        
+        # respond to speech act
+        user_input = respond_to_user(speech_act)
+        
 def find_speechact(user_input):
     userInputTransformed = transformUserSentence(wordDict, user_input)
     inputStructure = np.ndarray(shape=(1, 23))
@@ -90,6 +95,11 @@ def respond_to_user(speech_act):
 
 #TODO: Definieer elke speechact functie
 def inform():
+    food_preference = list(set(inputText) & set(np.concatenate(food_types.values.tolist(), axis=0)))
+    price_preference = list(set(inputText) & set(np.concatenate(price_types.values.tolist(), axis=0)))
+    location_preference = list(set(inputText) & set(np.concatenate(location_types.values.tolist(), axis=0)))
+
+    
     # TODO: zorg dat het ook werkt als niet alle criteria gegeven zijn, en bij vragen om meer info moet hij rekening houden met wat hij al weet
     for row in restaurant_info:
     #if all of the criteria are provided
@@ -127,7 +137,7 @@ def thankyou():
     
 def null():
     last_said = "Sorry, I don't understand what you mean"
-    print(last_said)
+    return(input(last_said + '\n'))
     
 def reqalts():
     last_suggested += 1
@@ -146,24 +156,28 @@ def bye():
     
 def ack():
     last_said = "Is there anything else you want to know?"
-    print(last_said)
+    return(input(last_said + '\n'))
+    
     
 def hello():
     last_said = "Hello, what type of food, price range and area are you looking for?"
-    print(last_said)
+    return(input(last_said + '\n'))
+    
     
 def negate():
     
     
 def repeat():
-    print(last_said)
+    return(input(last_said + '\n'))
     
 def reqmore():
     print("%s is a %s priced restaurant serving %s food in the %s part of town" % (restaurants[last_suggested], price, food, area))
-    print('Its phone number is ' + phones[last_suggested] + " and its adress is " + adresses[last_suggested] + ' '  + postcodes[last_suggested])
+    last_said = ('Its phone number is ' + phones[last_suggested] + " and its adress is " + adresses[last_suggested] + ' '  + postcodes[last_suggested])
+    return(input(last_said + '\n'))
     
 def restart():
-    print('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?')
+    last_said = ('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?')
+    return(input(last_said + '\n'))
 
 def confirm():
     
@@ -221,4 +235,4 @@ if len(restaurants) == 0:
 
 
 """
-
+conversation()
