@@ -2,6 +2,7 @@ import csv
 import random
 import pandas as pd
 import keras
+import numpy as np
 
 """
 Print welcome
@@ -14,10 +15,13 @@ restaurant_info = csv.reader(open("restaurantinfo.csv"), delimiter=",")
 
 # load speech act categorization network
 model = keras.models.load_model(model.h5) 
+wordDict = 
+catDict = 
+catDictReverseLookup = {v: k for k, v in catDict.items()}
 
 # initialize variables
 speech_act = ""
-last_said = ""
+last_said = "Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?"
 last_suggested = 0
 
 data = {'types':['food', 'area', 'price'], 'preferences':["","",""], 'order': [9,9,9]}
@@ -29,16 +33,38 @@ adresses = []
 postcodes = []
 
 # start conversation
-print('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?')
+user_input = input('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like? \n')
 
 while speech_act != "bye" and speech_act != "thankyou":
     # identify speech act
     #TODO: Find speechact: gebruik user input en getrainde netwerk van part 2
-    #speech_act = 
+    speech_act = find_speechact(user_input)
     
     # respond to speech act
     respond_to_user(speech_act)
     
+def find_speechact(user_input):
+    userInputTransformed = transformUserSentence(wordDict, user_input)
+    inputStructure = np.ndarray(shape=(1, 23))
+    inputStructure[0] = userInputTransformed
+
+    prediction = model.predict_classes(inputStructure)[0]
+    return(catDictReverseLookup[prediction + 1])    
+        
+def transformUserSentence(wordDict, sentence):
+    transformedSentence = np.ones((23,), dtype=int)
+    wordCount = 0
+
+    for word in sentence.split():
+        if word in wordDict:
+            transformedSentence[wordCount] = wordDict[word]
+        else:
+            transformedSentence[wordCount] = 0
+        wordCount += 1
+        if wordCount > 23:
+            break
+
+    return transformedSentence
     
 def respond_to_user(speech_act):
     switcher = {
