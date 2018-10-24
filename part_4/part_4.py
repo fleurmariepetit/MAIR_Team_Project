@@ -24,8 +24,8 @@ speech_act = ""
 last_said = "Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?"
 last_suggested = 0
 
-data = {'types':['food', 'area', 'price'], 'preferences':["","",""], 'order': [9,9,9]}
-preference = pd.DataFrame(data=data)
+data = {'preferences':["","",""], 'order': [9,9,9]}
+preference = pd.DataFrame(data=data, index = ['food', 'area', 'price'])
 
 restaurants = []
 phones = []
@@ -99,7 +99,8 @@ def inform():
     price_preference = list(set(inputText) & set(np.concatenate(price_types.values.tolist(), axis=0)))
     location_preference = list(set(inputText) & set(np.concatenate(location_types.values.tolist(), axis=0)))
 
-    
+    if food_preference != []:
+        preference[]
     # TODO: zorg dat het ook werkt als niet alle criteria gegeven zijn, en bij vragen om meer info moet hij rekening houden met wat hij al weet
     for row in restaurant_info:
     #if all of the criteria are provided
