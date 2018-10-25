@@ -8,7 +8,7 @@ import itertools
 import numpy as np
 import json
 from keras.layers import Embedding, LSTM, Dense
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 
 
 # Create the training and test set
@@ -200,7 +200,8 @@ def fit_lstm(emb_out, lstm_un, lstm_in, dense_in, nr_epoch):
 # emb_out = 128, lstm_un = 64, lstm_in = 128, dense_in = 32. We looked at the graphs of the best configuration
 # for 20 epochs and decided that 7 epochs would be enough. We tested all different combinations again for just 7 epochs.
 # The optimal combination of our test round was emb_out = 128, lstm_un = 64, lstm_in = 128, dense_in = 32.
-# The worst accuracy was for 32, 64, 54, 32, the highest loss for 32, 64, 64, 32, 7.
+# The worst accuracy was for 32, 64, 64, 32, the highest loss for 32, 64, 64, 32, 7. Optimal settings reach an accuracy
+# of .9702 on test set, and .9803 on trainingsset.
 neurons = []
 nr_epochs = [7]
 for i in range(5, 8):
