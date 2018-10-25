@@ -136,14 +136,14 @@ with open('part_2_optimalisation/wordDict.json', 'w') as wd:
     json.dump(wordDict, wd, sort_keys=True, indent=4)
 
 # Optimalisation
-accuracies = []
-losses = []
-plot_it = False
-
 with open('part_2_optimalisation/catDict.json', 'r') as cd:
     catDict = json.load(cd)
 with open('part_2_optimalisation/wordDict.json', 'r') as wd:
     wordDict = json.load(wd)
+
+accuracies = []
+losses = []
+plot_it = False
 
 def fit_lstm(emb_out, lstm_un, lstm_in, dense_in, nr_epoch):
     model = Sequential()
@@ -199,10 +199,10 @@ def fit_lstm(emb_out, lstm_un, lstm_in, dense_in, nr_epoch):
 # of 128, 64, and 32 neurons. They have been tested on 20 epochs. The optimum combination for this test run was
 # emb_out = 128, lstm_un = 64, lstm_in = 128, dense_in = 32. We looked at the graphs of the best configuration
 # for 20 epochs and decided that 7 epochs would be enough. We tested all different combinations again for just 7 epochs.
-# The optimal combination of our test round was emb_out = 128, lstm_un = 128, lstm_in = 128, dense_in = 64.
-# The worst accuracy was for 32, 64, 128, 32, the highest loss for 128, 128, 128, 32, 7.
+# The optimal combination of our test round was emb_out = 128, lstm_un = 64, lstm_in = 128, dense_in = 32.
+# The worst accuracy was for 32, 64, 54, 32, the highest loss for 32, 64, 64, 32, 7.
 neurons = []
-nr_epochs = [20]
+nr_epochs = [7]
 for i in range(5, 8):
     neurons.append(2 ** i)
 hyper_pars = [neurons, neurons, neurons, neurons, nr_epochs]
