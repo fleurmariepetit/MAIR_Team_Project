@@ -143,8 +143,8 @@ testLabels = transformLabels(transformTestset[1])
 
 model = Sequential()
 model.add(Embedding(len(wordDict) + 2, 128, input_length=23, mask_zero=True))
-model.add(LSTM(128, activation='relu', input_shape=(32,)))
-model.add(Dense(len(catDict), activation='softmax', input_shape=(64,)))
+model.add(LSTM(64, activation='relu', input_shape=(128,)))
+model.add(Dense(len(catDict), activation='softmax', input_shape=(32,)))
 print(model.summary())
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
