@@ -1,8 +1,9 @@
-import csv
 import random
 import pandas as pd
 import keras
 import numpy as np
+import json
+import re
 
 """
 Print welcome
@@ -14,31 +15,32 @@ respond according to speech act
 restaurant_info = pd.read_csv("restaurantinfo.csv")
 
 # load speech act categorization network
-model = keras.models.load_model(model.h5) 
-wordDict = 
-catDict = 
+model = keras.models.load_model('model7eps.h5') 
+wordDict = json.loads(open('wordDict7.json').read())
+catDict = json.loads(open('catDict7.json').read())
 catDictReverseLookup = {v: k for k, v in catDict.items()}
 
 # initialize variables
 speech_act = ""
 last_said = "Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?"
-last_suggested = 0
+last_suggested = -1
+user_input = ""
 
+pref_info = pd.DataFrame()
 data = {'preferences':["","",""], 'order': [-1,-1,-1]}
 preference = pd.DataFrame(data=data, index = ['food', 'area', 'price'])
 food_types = pd.read_csv('food_type.csv')
 price_types = pd.read_csv('price_type.csv')
 location_types = pd.read_csv('location_type.csv')
 
-
 # start conversation
-def conversation():
+def conversation(speech_act):
     user_input = input('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like? \n')
     
     while speech_act != "bye" and speech_act != "thankyou":
         # identify speech act
-        user_input = re.sub(r'[^\w\s]', '', user_input)
-        speech_act = find_speechact(user_input.lower())
+        user_input = re.sub(r'[^\w\s]', '', user_input).lower()
+        speech_act = find_speechact(user_input)
         
         # respond to speech act
         user_input = respond_to_user(speech_act)
@@ -72,7 +74,7 @@ def respond_to_user(speech_act):
             "request": request,
             "thankyou": thankyou,
             "null": null,
-            "requalts": requalts,
+            "reqalts": reqalts,
             "affirm": affirm,
             "bye": bye,
             "ack": ack,
@@ -88,12 +90,11 @@ def respond_to_user(speech_act):
     func = switcher.get(speech_act, "speechact unknown")
     return func()
 
-#TODO: Definieer elke speechact functie
 def inform():
     #identify preferences
-    food_preference = list(set(inputText) & set(np.concatenate(food_types.values.tolist(), axis=0)))
-    price_preference = list(set(inputText) & set(np.concatenate(price_types.values.tolist(), axis=0)))
-    location_preference = list(set(inputText) & set(np.concatenate(location_types.values.tolist(), axis=0)))
+    food_preference = list(set(user_input.split()) & set(np.concatenate(food_types.values.tolist(), axis=0)))
+    price_preference = list(set(user_input.split()) & set(np.concatenate(price_types.values.tolist(), axis=0)))
+    location_preference = list(set(user_input.split()) & set(np.concatenate(location_types.values.tolist(), axis=0)))
 
     if food_preference != []:
         preference.set_value('food', 'preferences', food_preference[0])
@@ -117,35 +118,61 @@ def inform():
     if preference.get_value('price', 'preferences') is not "":
         pref_info = pref_info[pref_info['pricerange']==preference.get_value('price', 'preferences')]
         unknown.remove('price')
+    pref_info['index'] = list(range(0,len(pref_info)))
+    pref_info = pref_info.set_index('index')
     
-    #give result
-    #TODO: hou rekening met order en met wat allemaal gespecificeerd is
-    if (len(restaurants) <= 10 and len(restaurants)>0) or unknown = []:
-        last_said = (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
-        return(input(last_said + '\n'))
-    
+    #suggest a restaurant
+    if (len(pref_info) <= 10 and len(pref_info)>0) or unknown == []:
+        global last_suggested
+        last_suggested += 1
+        return give_suggestion(last_suggested)
+        
     #if there are to many options and not all of the criteria are provided
-    else if len(restaurants) > 10:
+    elif len(pref_info) > 10:
         criteria = random.choice(unknown)
         last_said=('What kind of ' + criteria + ' would you like?')
         return(input(last_said + '\n'))
 
     #if there are no options in the data base
-    else if len(restaurants) == 0:
+    elif len(pref_info) == 0:
         last_said =('Sorry i could not find a restaurant with your preferences, do you have something else you would like?')
         return(input(last_said + '\n'))
-    
 
 def request():
-    #TODO: request = input('user: '), we should find a way to recognize the type of request of the user directly. 
-    #TODO: wat als gevraagde info onbekend is? 
-    if request == 'phone number':
-        last_said = ('The phone number is ' + phones[last_suggested])
+    # answer user's question
+    if 'price' in user_input:
+        last_said = ('The pricerange of the restaurant is ' + pref_info.get_value(last_suggested, 'pricerange'))
         return(input(last_said + '\n'))
     
-    if request == 'adress':
-        last_said =('The adress is ' + adresses[last_suggested] + ' '  + postcodes[last_suggested])
+    if 'area' in user_input:
+        last_said = ('The restaurant is in the' + pref_info.get_value(last_suggested, 'area') + " of town.")
         return(input(last_said + '\n'))
+    
+    if 'food' in user_input:
+        last_said = ('The restaurant serves ' + pref_info.get_value(last_suggested, 'food') + " food.")
+        return(input(last_said + '\n'))
+        
+    if 'number' in user_input:
+        if pd.isna(pref_info.get_value(last_suggested, 'phone'))== False:
+            last_said =('The phone number is ' + pref_info.get_value(last_suggested, 'phone'))
+            return(input(last_said + '\n'))
+        else:
+            last_said =('The phone number is unknown')
+            return(input(last_said + '\n'))
+    
+    if 'address' in user_input:
+        if pd.isna(pref_info.get_value(last_suggested, 'addr'))== False and pd.isna(pref_info.get_value(last_suggested, 'postcode'))== False:
+            last_said =('The adress is ' + pref_info.get_value(last_suggested, 'addr') + ' '  + pref_info.get_value(last_suggested, 'postcode'))
+            return(input(last_said + '\n'))
+        elif pd.isna(pref_info.get_value(last_suggested, 'addr'))== False and pd.isna(pref_info.get_value(last_suggested, 'postcode'))== True:
+            last_said =('The adress is ' + pref_info.get_value(last_suggested, 'addr'))
+            return(input(last_said + '\n'))
+        else:
+            last_said =('The adress is unknown')
+            return(input(last_said + '\n'))
+            
+    last_said = "Sorry, I don;t understand your request"
+    return(input(last_said + '\n'))
     
 def thankyou():
     print("You're welcome. Goodbye!")
@@ -156,16 +183,19 @@ def null():
     return(input(last_said + '\n'))
     
 def reqalts():
+    global last_suggested
     last_suggested += 1
-    if last_suggested < len(restaurants):
-        give_suggestion(last_suggested)
+    if last_suggested < len(pref_info):
+        return give_suggestion(last_suggested)
     else:
         print('Sorry there are no other restaurants with your preferences. I will repeat the earlier suggestions.')
         last_suggested = 0
-        give_suggestion(last_suggested)
+        return give_suggestion(last_suggested)
         
 def affirm():
-    
+    global last_suggested
+    last_suggested += 1
+    return give_suggestion(last_suggested)
     
 def bye():
     exit()
@@ -174,21 +204,21 @@ def ack():
     last_said = "Is there anything else you want to know?"
     return(input(last_said + '\n'))
     
-    
 def hello():
     last_said = "Hello, what type of food, price range and area are you looking for?"
     return(input(last_said + '\n'))
     
-    
 def negate():
-    
+    last_said = "Is there anything else I can help you with?"
+    return(input(last_said + '\n'))
     
 def repeat():
     return(input(last_said + '\n'))
     
 def reqmore():
-    print("%s is a %s priced restaurant serving %s food in the %s part of town" % (restaurants[last_suggested], price, food, area))
-    last_said = ('Its phone number is ' + phones[last_suggested] + " and its adress is " + adresses[last_suggested] + ' '  + postcodes[last_suggested])
+    # TODO: Hou er rekening mee dat niet altijd alle info bekend is. 
+    print("%s is a %s priced restaurant serving %s food in the %s part of town" % (pref_info.get_value(last_suggested, 'restaurantname'), pref_info.get_value(last_suggested, 'pricerange'), pref_info.get_value(last_suggested, 'food'), pref_info.get_value(last_suggested, 'area')))
+    last_said = ('Its phone number is ' + pref_info.get_value(last_suggested, 'phone') + " and its adress is " + pref_info.get_value(last_suggested, 'addr') + ' '  + pref_info.get_value(last_suggested, 'postcode'))
     return(input(last_said + '\n'))
     
 def restart():
@@ -196,59 +226,45 @@ def restart():
     return(input(last_said + '\n'))
 
 def confirm():
-    
+    conf_food = list(set(user_input.split()) & set(np.concatenate(food_types.values.tolist(), axis=0)))
+    conf_price = list(set(user_input.split()) & set(np.concatenate(price_types.values.tolist(), axis=0)))
+    conf_location = list(set(user_input.split()) & set(np.concatenate(location_types.values.tolist(), axis=0)))
+
+    if conf_food != []:
+        if conf_food[0] == pref_info.get_value(last_suggested,'food'):
+            last_said = 'Yes, the restaurant servers %s food' %(pref_info.get_value(last_suggested,'food'))
+            return(input(last_said + '\n'))
+        else:
+            last_said = 'No, the restaurant servers %s food' %(pref_info.get_value(last_suggested,'food'))
+            return(input(last_said + '\n'))
+     
+    if conf_price != []:
+        if conf_price[0] == pref_info.get_value(last_suggested,'pricerange'):
+            last_said = 'Yes, the restaurant is in the %s price range' %(pref_info.get_value(last_suggested,'pricerange'))
+            return(input(last_said + '\n'))
+        else:
+            last_said = 'No, the restaurant is in the %s price range' %(pref_info.get_value(last_suggested,'pricerange'))
+            return(input(last_said + '\n'))
+            
+    if conf_location != []:
+        if conf_location[0] == pref_info.get_value(last_suggested,'area'):
+            last_said = 'Yes, the restaurant is in the %s of town' %(pref_info.get_value(last_suggested,'area'))
+            return(input(last_said + '\n'))
+        else:
+            last_said = 'No, the restaurant is in the %s of town' %(pref_info.get_value(last_suggested,'area'))
+            return(input(last_said + '\n'))
+               
+    last_said = "Sorry, I do not understand what you said"
+    return(input(last_said + '\n'))
     
 def deny():
-    
+    last_said = "What are you exactly looking for? "
+    return(input(last_said + '\n'))
     
 def give_suggestion(last_suggested):
-    # TODO: suggesties moeten prijs, food en area in volgorde van opgeven geven.
-    print (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
+    # TODO: suggesties moeten alle gespecificeerde voorkeuren (prijs, food en area) in volgorde van opgeven geven.
+    last_said = (pref_info.get_value(last_suggested,'restaurantname') + ' is an ' + pref_info.get_value(last_suggested,'pricerance') + ' restaurant serving ' + pref_info.get_value(last_suggested,'food') + ' food in the ' + pref_info.get_value(last_suggested,'area') + ' part of town')
+    return(input(last_said + '\n'))
     
       
-    
-"""
-food = input('What type of food would you like?')
-price = input('What is your price range?')
-area = input('What part of town?')
-restaurants = []
-phones = []
-adresses = []
-postcodes = []
-
-
-for row in restaurant_info:
-    #if all of the criteria are provided
-    if price == row[1] and area == row[2] and food == row[3]:
-        print(row)
-        restaurants.append(row[0])
-        phones.append(row[4])
-        adresses.append(row[5])
-        postcodes.append(row[6])
-
-#give result
-if len(restaurants) < 10:
-    print (restaurants[0] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
-
-
-#If the user requests info about the restaurant
-request = input('user: ')
-if request == 'phone number':
-    print('The phone number is ' + phones[0])
-if request == 'adress':
-    print('The adress is ' + adresses[0] + ' '  + postcodes[0])
-
-
-#if there are to many options and not all of the criteria are provided
-if len(restaurants) > 10:
-    criteria = random.choice([' area',' price',' food'])
-    print('What kind of ' + criteria + ' would you like?')
-
-#if there are no options in the data base
-if len(restaurants) == 0:
-    print('Sorry i could not find a restaurant with your preferences, do you have something else you would like?')
-
-
-
-"""
-conversation()
+conversation(speech_act)

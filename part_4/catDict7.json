@@ -1,0 +1,17 @@
+{
+    "ack": 12,
+    "affirm": 6,
+    "bye": 8,
+    "confirm": 10,
+    "deny": 9,
+    "hello": 11,
+    "inform": 4,
+    "negate": 7,
+    "null": 2,
+    "repeat": 13,
+    "reqalts": 5,
+    "reqmore": 15,
+    "request": 3,
+    "restart": 14,
+    "thankyou": 1
+}
