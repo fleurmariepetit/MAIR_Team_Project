@@ -11,7 +11,7 @@ respond according to speech act
 """
 
 # read in restaurant data
-restaurant_info = csv.reader(open("restaurantinfo.csv"), delimiter=",")
+restaurant_info = pd.read_csv("restaurantinfo.csv")
 
 # load speech act categorization network
 model = keras.models.load_model(model.h5) 
@@ -24,13 +24,8 @@ speech_act = ""
 last_said = "Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?"
 last_suggested = 0
 
-data = {'preferences':["","",""], 'order': [9,9,9]}
+data = {'preferences':["","",""], 'order': [-1,-1,-1]}
 preference = pd.DataFrame(data=data, index = ['food', 'area', 'price'])
-
-restaurants = []
-phones = []
-adresses = []
-postcodes = []
 food_types = pd.read_csv('food_type.csv')
 price_types = pd.read_csv('price_type.csv')
 location_types = pd.read_csv('location_type.csv')
@@ -95,43 +90,63 @@ def respond_to_user(speech_act):
 
 #TODO: Definieer elke speechact functie
 def inform():
+    #identify preferences
     food_preference = list(set(inputText) & set(np.concatenate(food_types.values.tolist(), axis=0)))
     price_preference = list(set(inputText) & set(np.concatenate(price_types.values.tolist(), axis=0)))
     location_preference = list(set(inputText) & set(np.concatenate(location_types.values.tolist(), axis=0)))
 
     if food_preference != []:
-        preference[]
-    # TODO: zorg dat het ook werkt als niet alle criteria gegeven zijn, en bij vragen om meer info moet hij rekening houden met wat hij al weet
-    for row in restaurant_info:
-    #if all of the criteria are provided
-        if price == row[1] and area == row[2] and food == row[3]:
-            print(row)
-            restaurants.append(row[0])
-            phones.append(row[4])
-            adresses.append(row[5])
-            postcodes.append(row[6])
-
+        preference.set_value('food', 'preferences', food_preference[0])
+        preference.set_value('food', 'order', max(preference['order']+1))
+    if price_preference != []:
+         preference.set_value('price', 'preferences', price_preference[0])
+         preference.set_value('price', 'order', max(preference['order']+1))
+    if location_preference != []:
+         preference.set_value('area', 'preferences', location_preference[0])
+         preference.set_value('area', 'order', max(preference['order']+1))
+       
+    # find set of restaurants that are in line with the preferences    
+    unknown = ['area','price','food']
+    pref_info = restaurant_info
+    if preference.get_value('area', 'preferences') is not "":
+        pref_info = pref_info[pref_info['area']==preference.get_value('area', 'preferences')]
+        unknown.remove('area')
+    if preference.get_value('food', 'preferences') is not "":
+        pref_info = pref_info[pref_info['food']==preference.get_value('food', 'preferences')]
+        unknown.remove('food')
+    if preference.get_value('price', 'preferences') is not "":
+        pref_info = pref_info[pref_info['pricerange']==preference.get_value('price', 'preferences')]
+        unknown.remove('price')
+    
     #give result
-    if len(restaurants) <= 10 and len(restaurants)>0:
-        # TODO: or all 3 things are specified
-        print (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
+    #TODO: hou rekening met order en met wat allemaal gespecificeerd is
+    if (len(restaurants) <= 10 and len(restaurants)>0) or unknown = []:
+        last_said = (restaurants[last_suggested] + ' is an ' + price + ' restaurant serving ' + food + ' food in the ' + area + ' part of town')
+        return(input(last_said + '\n'))
     
     #if there are to many options and not all of the criteria are provided
-    if len(restaurants) > 10:
-        criteria = random.choice([' area',' price',' food'])
-        print('What kind of ' + criteria + ' would you like?')
+    else if len(restaurants) > 10:
+        criteria = random.choice(unknown)
+        last_said=('What kind of ' + criteria + ' would you like?')
+        return(input(last_said + '\n'))
 
     #if there are no options in the data base
-    if len(restaurants) == 0:
-        print('Sorry i could not find a restaurant with your preferences, do you have something else you would like?')
+    else if len(restaurants) == 0:
+        last_said =('Sorry i could not find a restaurant with your preferences, do you have something else you would like?')
+        return(input(last_said + '\n'))
+    
 
 def request():
     #TODO: request = input('user: '), we should find a way to recognize the type of request of the user directly. 
+    #TODO: wat als gevraagde info onbekend is? 
     if request == 'phone number':
-        print('The phone number is ' + phones[last_suggested])
+        last_said = ('The phone number is ' + phones[last_suggested])
+        return(input(last_said + '\n'))
+    
     if request == 'adress':
-        print('The adress is ' + adresses[last_suggested] + ' '  + postcodes[last_suggested])
-
+        last_said =('The adress is ' + adresses[last_suggested] + ' '  + postcodes[last_suggested])
+        return(input(last_said + '\n'))
+    
 def thankyou():
     print("You're welcome. Goodbye!")
     exit()
