@@ -262,9 +262,39 @@ def deny():
     return(input(last_said + '\n'))
     
 def give_suggestion(last_suggested):
-    # TODO: suggesties moeten alle gespecificeerde voorkeuren (prijs, food en area) in volgorde van opgeven geven.
-    last_said = (pref_info.get_value(last_suggested,'restaurantname') + ' is an ' + pref_info.get_value(last_suggested,'pricerance') + ' restaurant serving ' + pref_info.get_value(last_suggested,'food') + ' food in the ' + pref_info.get_value(last_suggested,'area') + ' part of town')
+    first_sentence = ''
+    second_sentence = ''
+    third_sentence = ''
+
+    food_sentence = ' serving ' + pref_info.get_value(last_suggested, 'food') + 'food'
+    price_sentence = ' in the ' + pref_info.get_value(last_suggested, 'pricerance') + ' price range'
+    area_sentence = ' in the ' + pref_info.get_value(last_suggested, 'area') + ' part of town'
+
+    food_order = preference.get_value('food', 'order')
+    if food_order == 0:
+        first_sentence = food_sentence
+    if food_order == 1:
+        second_sentence = food_sentence
+    if food_order == 2:
+        third_sentence = food_sentence
+
+    area_order = preference.get_value('area', 'order')
+    if area_order == 0:
+        first_sentence = area_sentence
+    if area_order == 1:
+        second_sentence = area_sentence
+    if area_order == 2:
+        third_sentence = area_sentence
+
+    price_order = preference.get_value('price', 'order')
+    if price_order == 0:
+        first_sentence = price_sentence
+    if price_order == 1:
+        second_sentence = area_sentence
+    if price_order == 2:
+        third_sentence = area_sentence
+
+    last_said = (pref_info.get_value(last_suggested,'restaurantname') + ' is a restaurant ' + first_sentence + second_sentence + third_sentence + '.')
     return(input(last_said + '\n'))
     
-      
 conversation(speech_act)
