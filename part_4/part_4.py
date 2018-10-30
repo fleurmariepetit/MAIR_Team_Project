@@ -5,6 +5,10 @@ import numpy as np
 import json
 import re
 
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+pd.options.mode.chained_assignment = None
+
 """
 Print welcome
 Recognize speech act of user input
