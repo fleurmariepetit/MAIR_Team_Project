@@ -120,8 +120,7 @@ def inform():
 
     # TODO: It seems it doesn't remove from unknown. Keeps refreshing each loop.
     unknown = ['area', 'price', 'food']
-    print(unknown)
-
+    
     #If the user doesn't care
     if ('doesnt matter' or 'does not matter' or 'dont care' or 'do not care') in user_input:
         if 'area' in last_said:
@@ -281,9 +280,15 @@ def repeat():
 def reqmore():
     global last_said
 
-    # TODO: Hou er rekening mee dat niet altijd alle info bekend is. 
-    print("%s is a %s priced restaurant serving %s food in the %s part of town" % (pref_info.get_value(last_suggested, 'restaurantname'), pref_info.get_value(last_suggested, 'pricerange'), pref_info.get_value(last_suggested, 'food'), pref_info.get_value(last_suggested, 'area')))
-    last_said = ('Its phone number is ' + pref_info.get_value(last_suggested, 'phone') + " and its adress is " + pref_info.get_value(last_suggested, 'addr') + ' '  + pref_info.get_value(last_suggested, 'postcode'))
+    print("%s is a %s priced restaurant serving %s food in the %s part of town." % (pref_info.get_value(last_suggested, 'restaurantname'), pref_info.get_value(last_suggested, 'pricerange'), pref_info.get_value(last_suggested, 'food'), pref_info.get_value(last_suggested, 'area')))
+    last_said  = ""
+    if not pd.isna(pref_info.get_value(last_suggested, 'phone')):
+        last_said = last_said + 'Its phone number is ' + pref_info.get_value(last_suggested, 'phone') + ". "
+    if not pd.isna(pref_info.get_value(last_suggested, 'addr')):
+        last_said = last_said + "Its adress is " + pref_info.get_value(last_suggested, 'addr') 
+        if not pd.isna(pref_info.get_value(last_suggested, 'postcode')):
+            last_said = last_said + " " + pref_info.get_value(last_suggested, 'postcode') + "."
+  
     return(input(last_said + '\n'))
     
 def restart():
@@ -300,35 +305,27 @@ def confirm():
     conf_location = list(set(user_input.split()) & set(np.concatenate(location_types.values.tolist(), axis=0)))
 
     conf_t = True
-    category = []
+    text = ""
 
     if conf_food != []:
         if conf_food[0] != pref_info.get_value(last_suggested,'food'):
             conf_t = False
-            category.append("food")
-
+            text = text + "The restaurant serves " + pref_info.get_value(last_suggested,'food')+ " food. "
+        
     if conf_price != []:
-        if conf_price[0] != pref_info.get_value(last_suggested,'pricerange'):
+         if conf_price[0] != pref_info.get_value(last_suggested,'pricerange'):
             conf_t = False
-            category.append("pricerange")
-
+            text = text + "The restaurant is in the " + pref_info.get_value(last_suggested,'pricerange')+ " price range. "
+       
     if conf_location != []:
         if conf_location[0] != pref_info.get_value(last_suggested,'area'):
             conf_t = False
-            category.append("area")
-
-    cat_str = ""
-    for e in category:
-        e = str(e)
-        if e == category[0]:
-            cat_str = e
-        else:
-            cat_str = cat_str + ", " + e
-
+            text = text + "The restaurant is in the " + pref_info.get_value(last_suggested,'area')+ " of town. "
+       
     if conf_t:
-        last_said = "Yes, I saved it correctly."
+        last_said = "Yes, indeed. "
     else:
-        last_said = "No, I am afraid you misunderstood the" + cat_str + "."
+        last_said = "No. " + text
 
     return(input(last_said + '\n'))
     
