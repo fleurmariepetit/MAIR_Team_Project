@@ -51,10 +51,22 @@ def createWordAndCatogoryDictionaries(fileName):
                     if word not in wordDict:
                         wordDict[word] = wordcount
                         wordcount += 1
+
+        with open('part_2_optimalisation/catDict.json', 'w') as cd:
+            json.dump(catDict, cd, sort_keys=True, indent=4)
+
+        with open('part_2_optimalisation/wordDict.json', 'w') as wd:
+            json.dump(wordDict, wd, sort_keys=True, indent=4)
+
     return wordDict, catDict
 
 
 # Transform the sentences to integer strings and
+with open('part_2_optimalisation/catDict.json', 'r') as cd:
+    catDict = json.load(cd)
+with open('part_2_optimalisation/wordDict.json', 'r') as wd:
+    wordDict = json.load(wd)
+
 def transformSentences(wordDict, catDict, filename):
     with open(filename, 'r') as f:
         sentences = []
@@ -109,19 +121,19 @@ def transformLabels(labels):
 
 completeDatasetFileName = 'part_2_optimalisation/acts_and_utts.txt'
 
-trainingSetFileName = 'trainingSet.txt'
-testSetFileName = 'testSet.txt'
+trainingSetFileName = 'part_2_optimalisation/trainingSet.txt'
+testSetFileName = 'part_2_optimalisation/testSet.txt'
 trainingSetSizePercentile = 85
 
-transformedTraingsSetFileName = 'transformedTrainingSet.txt'
-transformedLabelsSetFileName = 'transformedLabelsSet.txt'
+transformedTraingsSetFileName = 'part_2_optimalisation/transformedTrainingSet.txt'
+transformedLabelsSetFileName = 'part_2_optimalisation/transformedLabelsSet.txt'
 
 createTrainAndTestSets(completeDatasetFileName, trainingSetSizePercentile, trainingSetFileName, testSetFileName)
 
-wordDict, catDict = createWordAndCatogoryDictionaries('trainingSet.txt')
+wordDict, catDict = createWordAndCatogoryDictionaries('part_2_optimalisation/trainingSet.txt')
 
-transformResult = transformSentences(wordDict, catDict, 'trainingSet.txt')
-transformTestset = transformSentences(wordDict, catDict, 'testSet.txt')
+transformResult = transformSentences(wordDict, catDict, 'part_2_optimalisation/trainingSet.txt')
+transformTestset = transformSentences(wordDict, catDict, 'part_2_optimalisation/testSet.txt')
 
 trainData = np.array(transformResult[0])
 trainLabels = transformLabels(transformResult[1])
@@ -129,18 +141,7 @@ trainLabels = transformLabels(transformResult[1])
 testData = np.array(transformTestset[0])
 testLabels = transformLabels(transformTestset[1])
 
-with open('part_2_optimalisation/catDict.json', 'w') as cd:
-    json.dump(catDict, cd, sort_keys=True, indent=4)
-
-with open('part_2_optimalisation/wordDict.json', 'w') as wd:
-    json.dump(wordDict, wd, sort_keys=True, indent=4)
-
 # Optimalisation
-with open('part_2_optimalisation/catDict.json', 'r') as cd:
-    catDict = json.load(cd)
-with open('part_2_optimalisation/wordDict.json', 'r') as wd:
-    wordDict = json.load(wd)
-
 accuracies = []
 losses = []
 plot_it = False

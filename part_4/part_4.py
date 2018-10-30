@@ -35,6 +35,7 @@ location_types = pd.read_csv('location_type.csv')
 
 # start conversation
 def conversation(speech_act):
+    global user_input
     user_input = input('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like? \n')
     
     while speech_act != "bye" and speech_act != "thankyou":
@@ -44,6 +45,8 @@ def conversation(speech_act):
         
         # respond to speech act
         user_input = respond_to_user(speech_act)
+        if user_input == "quit":
+            break
         
 def find_speechact(user_input):
     userInputTransformed = transformUserSentence(wordDict, user_input)
@@ -92,6 +95,7 @@ def respond_to_user(speech_act):
 
 def inform():
     #identify preferences
+    global pref_info
     food_preference = list(set(user_input.split()) & set(np.concatenate(food_types.values.tolist(), axis=0)))
     price_preference = list(set(user_input.split()) & set(np.concatenate(price_types.values.tolist(), axis=0)))
     location_preference = list(set(user_input.split()) & set(np.concatenate(location_types.values.tolist(), axis=0)))
@@ -267,7 +271,7 @@ def give_suggestion(last_suggested):
     third_sentence = ''
 
     food_sentence = ' serving ' + pref_info.get_value(last_suggested, 'food') + 'food'
-    price_sentence = ' in the ' + pref_info.get_value(last_suggested, 'pricerance') + ' price range'
+    price_sentence = ' in the ' + pref_info.get_value(last_suggested, 'pricerange') + ' price range'
     area_sentence = ' in the ' + pref_info.get_value(last_suggested, 'area') + ' part of town'
 
     food_order = preference.get_value('food', 'order')
