@@ -117,19 +117,57 @@ def inform():
     if location_preference != []:
          preference.set_value('area', 'preferences', location_preference[0])
          preference.set_value('area', 'order', max(preference['order']+1))
-       
+
+    # TODO: It seems it doesn't remove from unknown. Keeps refreshing each loop.
+    unknown = ['area', 'price', 'food']
+    print(unknown)
+
+    #If the user doesn't care
+    if ('doesnt matter' or 'does not matter' or 'dont care' or 'do not care') in user_input:
+        if 'area' in last_said:
+            preference.set_value('area', 'preferences', 'irrelevant')
+            unknown.remove('area')
+            preference.set_value('area', 'order', max(preference['order'] + 1))
+        elif 'price' in last_said:
+            preference.set_value('price', 'preferences', 'irrelevant')
+            unknown.remove('price')
+            preference.set_value('price', 'order', max(preference['order'] + 1))
+        elif 'food' in last_said:
+            preference.set_value('food', 'preferences', 'irrelevant')
+            unknown.remove('food')
+            preference.set_value('food', 'order', max(preference['order'] + 1))
+
+    # if anything is good
+    if 'any' in user_input:
+        list_of_words = user_input.split()
+        next_word = list_of_words[list_of_words.index('any') + 1]
+        if next_word == 'area':
+            preference.set_value('area', 'preferences', 'irrelevant')
+            unknown.remove('area')
+            preference.set_value('area', 'order', max(preference['order'] + 1))
+        if next_word == 'price':
+            preference.set_value('price', 'preferences', 'irrelevant')
+            unknown.remove('price')
+            preference.set_value('price', 'order', max(preference['order'] + 1))
+        if next_word == 'food':
+            preference.set_value('food', 'preferences', 'irrelevant')
+            unknown.remove('food')
+            preference.set_value('food', 'order', max(preference['order'] + 1))
+
     # find set of restaurants that are in line with the preferences    
-    unknown = ['area','price','food']
     pref_info = restaurant_info
     if preference.get_value('area', 'preferences') is not "":
-        pref_info = pref_info[pref_info['area']==preference.get_value('area', 'preferences')]
-        unknown.remove('area')
+        if preference.get_value('area', 'preferences') is not'irrelevant':
+            pref_info = pref_info[pref_info['area']==preference.get_value('area', 'preferences')]
+            unknown.remove('area')
     if preference.get_value('food', 'preferences') is not "":
-        pref_info = pref_info[pref_info['food']==preference.get_value('food', 'preferences')]
-        unknown.remove('food')
+        if preference.get_value('food', 'preferences') is not 'irrelevant':
+            pref_info = pref_info[pref_info['food']==preference.get_value('food', 'preferences')]
+            unknown.remove('food')
     if preference.get_value('price', 'preferences') is not "":
-        pref_info = pref_info[pref_info['pricerange']==preference.get_value('price', 'preferences')]
-        unknown.remove('price')
+        if preference.get_value('price', 'preferences') is not 'irrelevant':
+            pref_info = pref_info[pref_info['pricerange']==preference.get_value('price', 'preferences')]
+            unknown.remove('price')
     pref_info['index'] = list(range(0,len(pref_info)))
     pref_info = pref_info.set_index('index')
     
