@@ -45,9 +45,10 @@ def conversation(speech_act):
         
         # respond to speech act
         user_input = respond_to_user(speech_act)
+
         if user_input == "quit":
             break
-        
+
 def find_speechact(user_input):
     userInputTransformed = transformUserSentence(wordDict, user_input)
     inputStructure = np.ndarray(shape=(1, 23))
@@ -96,6 +97,9 @@ def respond_to_user(speech_act):
 def inform():
     #identify preferences
     global pref_info
+    global preference
+    global last_said
+
     food_preference = list(set(user_input.split()) & set(np.concatenate(food_types.values.tolist(), axis=0)))
     price_preference = list(set(user_input.split()) & set(np.concatenate(price_types.values.tolist(), axis=0)))
     location_preference = list(set(user_input.split()) & set(np.concatenate(location_types.values.tolist(), axis=0)))
@@ -143,6 +147,8 @@ def inform():
         return(input(last_said + '\n'))
 
 def request():
+    global last_said
+
     # answer user's question
     if 'price' in user_input:
         last_said = ('The pricerange of the restaurant is ' + pref_info.get_value(last_suggested, 'pricerange'))
@@ -183,11 +189,14 @@ def thankyou():
     exit()
     
 def null():
+    global last_said
+
     last_said = "Sorry, I don't understand what you mean"
     return(input(last_said + '\n'))
     
 def reqalts():
     global last_suggested
+
     last_suggested += 1
     if last_suggested < len(pref_info):
         return give_suggestion(last_suggested)
@@ -205,72 +214,96 @@ def bye():
     exit()
     
 def ack():
+    global last_said
+
     last_said = "Is there anything else you want to know?"
     return(input(last_said + '\n'))
     
 def hello():
+    global last_said
+
     last_said = "Hello, what type of food, price range and area are you looking for?"
     return(input(last_said + '\n'))
     
 def negate():
+    global last_said
+
     last_said = "Is there anything else I can help you with?"
     return(input(last_said + '\n'))
     
 def repeat():
+    global last_said
+
     return(input(last_said + '\n'))
     
 def reqmore():
+    global last_said
+
     # TODO: Hou er rekening mee dat niet altijd alle info bekend is. 
     print("%s is a %s priced restaurant serving %s food in the %s part of town" % (pref_info.get_value(last_suggested, 'restaurantname'), pref_info.get_value(last_suggested, 'pricerange'), pref_info.get_value(last_suggested, 'food'), pref_info.get_value(last_suggested, 'area')))
     last_said = ('Its phone number is ' + pref_info.get_value(last_suggested, 'phone') + " and its adress is " + pref_info.get_value(last_suggested, 'addr') + ' '  + pref_info.get_value(last_suggested, 'postcode'))
     return(input(last_said + '\n'))
     
 def restart():
+    global last_said
+
     last_said = ('Welcome to the restaurant system. You can ask for restaurants by price, area and the type of food. What would you like?')
     return(input(last_said + '\n'))
 
 def confirm():
+    global last_said
+
     conf_food = list(set(user_input.split()) & set(np.concatenate(food_types.values.tolist(), axis=0)))
     conf_price = list(set(user_input.split()) & set(np.concatenate(price_types.values.tolist(), axis=0)))
     conf_location = list(set(user_input.split()) & set(np.concatenate(location_types.values.tolist(), axis=0)))
 
+    conf_t = True
+    category = []
+
     if conf_food != []:
-        if conf_food[0] == pref_info.get_value(last_suggested,'food'):
-            last_said = 'Yes, the restaurant servers %s food' %(pref_info.get_value(last_suggested,'food'))
-            return(input(last_said + '\n'))
-        else:
-            last_said = 'No, the restaurant servers %s food' %(pref_info.get_value(last_suggested,'food'))
-            return(input(last_said + '\n'))
-     
+        if conf_food[0] != pref_info.get_value(last_suggested,'food'):
+            conf_t = False
+            category.append("food")
+
     if conf_price != []:
-        if conf_price[0] == pref_info.get_value(last_suggested,'pricerange'):
-            last_said = 'Yes, the restaurant is in the %s price range' %(pref_info.get_value(last_suggested,'pricerange'))
-            return(input(last_said + '\n'))
-        else:
-            last_said = 'No, the restaurant is in the %s price range' %(pref_info.get_value(last_suggested,'pricerange'))
-            return(input(last_said + '\n'))
-            
+        if conf_price[0] != pref_info.get_value(last_suggested,'pricerange'):
+            conf_t = False
+            category.append("pricerange")
+
     if conf_location != []:
-        if conf_location[0] == pref_info.get_value(last_suggested,'area'):
-            last_said = 'Yes, the restaurant is in the %s of town' %(pref_info.get_value(last_suggested,'area'))
-            return(input(last_said + '\n'))
+        if conf_location[0] != pref_info.get_value(last_suggested,'area'):
+            conf_t = False
+            category.append("area")
+
+    cat_str = ""
+    for e in category:
+        e = str(e)
+        if e == category[0]:
+            cat_str = e
         else:
-            last_said = 'No, the restaurant is in the %s of town' %(pref_info.get_value(last_suggested,'area'))
-            return(input(last_said + '\n'))
-               
-    last_said = "Sorry, I do not understand what you said"
+            cat_str = cat_str + ", " + e
+
+    if conf_t:
+        last_said = "Yes, I saved it correctly."
+    else:
+        last_said = "No, I am afraid you misunderstood the" + cat_str + "."
+
     return(input(last_said + '\n'))
     
 def deny():
+    global last_said
+
     last_said = "What are you exactly looking for? "
     return(input(last_said + '\n'))
     
 def give_suggestion(last_suggested):
+    global last_said
+
     first_sentence = ''
     second_sentence = ''
     third_sentence = ''
 
-    food_sentence = ' serving ' + pref_info.get_value(last_suggested, 'food') + 'food'
+    food_sentence = ' serving ' + pref_info.get_value(last_suggested, 'food') + ' food'
     price_sentence = ' in the ' + pref_info.get_value(last_suggested, 'pricerange') + ' price range'
     area_sentence = ' in the ' + pref_info.get_value(last_suggested, 'area') + ' part of town'
 
@@ -294,11 +327,11 @@ def give_suggestion(last_suggested):
     if price_order == 0:
         first_sentence = price_sentence
     if price_order == 1:
-        second_sentence = area_sentence
+        second_sentence = price_sentence
     if price_order == 2:
-        third_sentence = area_sentence
+        third_sentence = price_sentence
 
-    last_said = (pref_info.get_value(last_suggested,'restaurantname') + ' is a restaurant ' + first_sentence + second_sentence + third_sentence + '.')
+    last_said = (pref_info.get_value(last_suggested,'restaurantname') + ' is a restaurant' + first_sentence + second_sentence + third_sentence + '.')
     return(input(last_said + '\n'))
     
 conversation(speech_act)
