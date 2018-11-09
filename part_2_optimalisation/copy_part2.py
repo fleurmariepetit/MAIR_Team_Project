@@ -228,6 +228,9 @@ max_loss = int()
 # 10 epochs:
 # 0.9901115848680032
 # [128, 64, 10]
+
+# 10 epoch model:
+# loss: 0.0411 - acc: 0.9875 - val_loss: 0.1028 - val_acc: 0.9805
 def opt_neurons():
     for j in range(0, len(fit_args)):
         emb_out = fit_args[j][0]
