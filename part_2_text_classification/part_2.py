@@ -149,7 +149,7 @@ print(model.summary())
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-history = model.fit(trainData, trainLabels, epochs=7, validation_data=(testData, testLabels))
+history = model.fit(trainData, trainLabels, epochs=10, validation_data=(testData, testLabels))
 
 # Create a reverse lookup table from the dictionary to search by values instead of keys
 catDictReverseLookup = {v: k for k, v in catDict.items()}
