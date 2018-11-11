@@ -336,8 +336,8 @@ if (len(possible_trees) > 0):
     print('Location preference: ' + preferences[2])
 else:
     traverse(finished_trees[0])
-    print('Food preference: disjoint / not present')
-    print('Price range: disjoint / not present')
-    print('Location preference: disjoint / not present')
+    print('Food preference: preference subtree not disjoint / not present')
+    print('Price range: preference subtree not disjoint / not present')
+    print('Location preference: preference subtree not disjoint / not present')
 
 draw_image(edges)
