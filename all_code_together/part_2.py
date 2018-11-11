@@ -1,5 +1,6 @@
 import math
 import random
+import json
 
 import numpy as np
 from keras.layers import Embedding, LSTM, Dense
@@ -63,6 +64,13 @@ def createWordAndCatogoryDictionaries(fileName):
                     if word not in wordDict:
                         wordDict[word] = wordcount
                         wordcount += 1
+
+        with open('catDict.json', 'w') as cd:
+            json.dump(catDict, cd, sort_keys=True, indent=4)
+
+        with open('wordDict.json', 'w') as wd:
+            json.dump(wordDict, wd, sort_keys=True, indent=4)
+
     return wordDict, catDict
 
 

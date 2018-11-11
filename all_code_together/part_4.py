@@ -13,7 +13,7 @@ pd.options.mode.chained_assignment = None
 restaurant_info = pd.read_csv('restaurantinfo.csv')
 
 # load speech act categorization network
-model = keras.models.load_model('model10eps.h5')
+model = keras.models.load_model('model.h5')
 wordDict = json.loads(open('wordDict.json').read())
 catDict = json.loads(open('catDict.json').read())
 catDictReverseLookup = {v: k for k, v in catDict.items()}
