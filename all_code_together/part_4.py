@@ -4,7 +4,6 @@ import keras
 import numpy as np
 import json
 import re
-
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)

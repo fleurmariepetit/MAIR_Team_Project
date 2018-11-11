@@ -219,15 +219,15 @@ location_types = pd.read_csv('location_type.csv')
 # inputText = 'I want a restaurant serving Swedish food'.lower()
 # inputText = 'I want a restaurant that serves world food'.lower()
 # inputText = 'I need a Cuban restaurant that is moderately priced'.lower()
-#inputText = 'I wanna find a cheap restaurant'.lower()
-inputText = 'What is a cheap restaurant in the south part of town'.lower()
-#inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
+# inputText = 'I wanna find a cheap restaurant'.lower()
+# inputText = 'What is a cheap restaurant in the south part of town'.lower()
+# inputText = 'I\'m looking for a moderately priced restaurant with Catalan food'.lower()
 # inputText = 'I\'m looking for a restaurant in any area that serves Tuscan food'.lower()
 # inputText = 'I\'m looking for a restaurant in the center'.lower()
-#inputText = 'Find a Cuban restaurant in the center'.lower()
-#inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
-#inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
-# inputText = 'I would like a cheap restaurant in the west part of town'.lower()
+# inputText = 'Find a Cuban restaurant in the center'.lower()
+# inputText = 'I\'m looking for an expensive restaurant and it should serve international food'.lower()
+# inputText = 'I\'m looking for a moderately priced restaurant in the west part of town'.lower()
+inputText = 'I would like a cheap restaurant in the west part of town'.lower()
 
 inputText = re.sub(r'[^\w\s]', '', inputText).split()
 
@@ -323,7 +323,7 @@ print('Amount of trees with correct preference:' + str(len(possible_trees)))
 if (len(possible_trees) > 0):
     traverse(possible_trees[0])
 
-    preferences = ['disjoint / not present', 'disjoint / not present', 'disjoint / not present']
+    preferences = ['preference subtree not disjoint / not present', 'preference subtree not disjoint / not present', 'preference subtree not disjoint / not present']
     if len(food_preference) > 0:
         preferences[0] = food_preference[0]
     if (len(price_preference) > 0):
